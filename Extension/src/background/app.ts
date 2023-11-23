@@ -61,6 +61,7 @@ import {
     localeDetect,
     PromoNotificationService,
     filterUpdateService,
+    filterPatchUpdateService,
 } from './services';
 import { SettingOption } from './schema';
 import { getRunInfo } from './utils';
@@ -148,6 +149,9 @@ export class App {
 
         // Initialize filters updates
         await filterUpdateService.init();
+
+        // Initialize filters updates by patches
+        await filterPatchUpdateService.init();
 
         /**
          * Initializes promo notifications:

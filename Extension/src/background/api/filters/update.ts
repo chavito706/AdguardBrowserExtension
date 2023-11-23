@@ -23,6 +23,7 @@ import {
 } from '../../schema';
 import { DEFAULT_FILTERS_UPDATE_PERIOD } from '../../../common/settings';
 import { Log } from '../../../common/log';
+import { FiltersUpdateTime } from '../../../common/constants';
 
 import { FilterMetadata, FiltersApi } from './main';
 import { CustomFilterApi } from './custom';
@@ -97,7 +98,7 @@ export class FilterUpdateApi {
 
         const updatePeriod = settingsStorage.get(SettingOption.FiltersUpdatePeriod);
         // Auto update disabled.
-        if (updatePeriod === 0 && !forceUpdate) {
+        if (updatePeriod === FiltersUpdateTime.Disabled && !forceUpdate) {
             return [];
         }
 

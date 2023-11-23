@@ -27,6 +27,7 @@ import {
     filterStateStorage,
     settingsStorage,
     FiltersStorage,
+    RawFiltersStorage,
     filterVersionStorage,
 } from '../../storages';
 import { network } from '../network';
@@ -42,6 +43,7 @@ import { FiltersApi } from './main';
  * - {@link filterStateStorage} filters states;
  * - {@link filterVersionStorage} filters versions;
  * - {@link FiltersStorage} filter rules.
+ * - {@link RawFiltersStorage} raw filter rules, before applying directives.
  */
 export class CommonFilterApi {
     /**
@@ -122,7 +124,10 @@ export class CommonFilterApi {
         const isOptimized = settingsStorage.get(SettingOption.UseOptimizedFilters);
 
         const rules = await network.downloadFilterRules(filterId, remote, isOptimized);
+        const rawRules = await network.downloadFilterRules(filterId, remote, isOptimized, true);
+
         await FiltersStorage.set(filterId, rules);
+        await RawFiltersStorage.set(filterId, rawRules);
 
         const currentFilterState = filterStateStorage.get(filterId);
         filterStateStorage.set(filterId, {

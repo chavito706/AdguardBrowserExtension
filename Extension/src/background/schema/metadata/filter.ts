@@ -33,6 +33,12 @@ export const baseMetadataValidator = zod.object({
      */
     expires: zod.number(),
     /**
+     * The time in seconds during which the filter content remains fresh
+     * and does not need to be updated using differential updates.
+     * Used to auto-renew filters.
+     */
+    diffExpiresSeconds: zod.number().optional(),
+    /**
      * Id of the filter.
      */
     filterId: zod.number(),

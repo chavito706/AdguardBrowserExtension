@@ -42,6 +42,8 @@ import {
 } from '../events';
 import { listeners } from '../notifier';
 
+import { filterPatchUpdateService } from './filter-patch-update';
+
 /**
  * FiltersService creates handlers for messages that relate to filters.
  */
@@ -166,14 +168,17 @@ export class FiltersService {
      */
     private static async manualCheckFiltersUpdate(): Promise<FilterMetadata[] | undefined> {
         try {
-            const updatedFilters = await FilterUpdateApi.autoUpdateFilters(true);
+            await filterPatchUpdateService.update();
 
-            Engine.debounceUpdate();
+            return;
+            // const updatedFilters = await FilterUpdateApi.autoUpdateFilters(true);
 
-            toasts.showFiltersUpdatedAlertMessage(true, updatedFilters);
-            listeners.notifyListeners(listeners.FiltersUpdateCheckReady, updatedFilters);
+            // Engine.debounceUpdate();
 
-            return updatedFilters;
+            // toasts.showFiltersUpdatedAlertMessage(true, updatedFilters);
+            // listeners.notifyListeners(listeners.FiltersUpdateCheckReady, updatedFilters);
+
+            // return updatedFilters;
         } catch (e) {
             toasts.showFiltersUpdatedAlertMessage(false);
             listeners.notifyListeners(listeners.FiltersUpdateCheckReady);

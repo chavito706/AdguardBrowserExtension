@@ -29,6 +29,7 @@ import {
     GroupStateStorage,
     FilterVersionStorage,
     FiltersStorage,
+    RawFiltersStorage,
 } from '../../storages';
 import {
     type Metadata,
@@ -505,6 +506,7 @@ export class FiltersApi {
                 filterVersionStorage.delete(id);
                 filterStateStorage.delete(id);
                 await FiltersStorage.remove(id);
+                await RawFiltersStorage.remove(id);
 
                 Log.info(`Filter with id: ${id} removed from the storage`);
             });

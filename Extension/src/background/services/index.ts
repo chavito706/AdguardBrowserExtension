@@ -28,3 +28,4 @@ export * from './filters';
 export * from './locale-detect';
 export * from './document-block';
 export * from './filter-update';
+export * from './filter-patch-update';

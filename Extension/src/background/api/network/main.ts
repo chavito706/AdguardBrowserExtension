@@ -16,7 +16,7 @@
  * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
  */
 import browser from 'webextension-polyfill';
-import FiltersDownloader from '@adguard/filters-downloader/browser';
+import FiltersDownloader, { DefinedExpressions } from '@adguard/filters-downloader/browser';
 
 import { LOCALE_METADATA_FILE_NAME, LOCALE_I18N_METADATA_FILE_NAME } from '../../../../../constants';
 import { UserAgent } from '../../../common/user-agent';
@@ -51,7 +51,7 @@ export class Network {
     /**
      * FiltersDownloader constants.
      */
-    private filterCompilerConditionsConstants = {
+    private filterCompilerConditionsConstants: DefinedExpressions = {
         adguard: true,
         adguard_ext_chromium: UserAgent.isChromium,
         adguard_ext_firefox: UserAgent.isFirefox,
@@ -65,17 +65,23 @@ export class Network {
      */
     private loadingSubscriptions: Record<string, boolean> = {};
 
+    public get conditionsConstants(): DefinedExpressions {
+        return this.filterCompilerConditionsConstants;
+    }
+
     /**
      * Downloads filter rules by filter ID.
      *
      * @param filterId              Filter identifier.
      * @param forceRemote           Force download filter rules from remote server.
      * @param useOptimizedFilters   Download optimized filters flag.
+     * @param keepFilterRaw
      */
     public async downloadFilterRules(
         filterId: number,
         forceRemote: boolean,
         useOptimizedFilters: boolean,
+        keepFilterRaw: boolean = false,
     ): Promise<string[]> {
         let url: string;
 
@@ -88,6 +94,10 @@ export class Network {
             }
         }
 
+        if (keepFilterRaw) {
+            return FiltersDownloader.downloadRaw(url);
+        }
+
         return FiltersDownloader.download(url, this.filterCompilerConditionsConstants);
     }
 
@@ -95,8 +105,12 @@ export class Network {
      * Downloads filter rules by url.
      *
      * @param url Subscription url.
+     * @param keepFilterRaw
      */
-    public async downloadFilterRulesBySubscriptionUrl(url: string): Promise<string[] | undefined> {
+    public async downloadFilterRulesBySubscriptionUrl(
+        url: string,
+        keepFilterRaw: boolean = false,
+    ): Promise<string[] | undefined> {
         if (url in this.loadingSubscriptions) {
             return;
         }
@@ -104,8 +118,15 @@ export class Network {
         this.loadingSubscriptions[url] = true;
 
         try {
-            // TODO: runtime validation
-            const lines = await FiltersDownloader.download(url, this.filterCompilerConditionsConstants);
+            let lines: string[] = [];
+
+            if (keepFilterRaw) {
+                // TODO: runtime validation
+                lines = await FiltersDownloader.downloadRaw(url);
+            } else {
+                // TODO: runtime validation
+                lines = await FiltersDownloader.download(url, this.filterCompilerConditionsConstants);
+            }
 
             delete this.loadingSubscriptions[url];
 
@@ -324,7 +345,7 @@ export class Network {
      *
      * @returns Url for filter downloading.
      */
-    private getUrlForDownloadFilterRules(filterId: number, useOptimizedFilters: boolean): string {
+    public getUrlForDownloadFilterRules(filterId: number, useOptimizedFilters: boolean): string {
         const url = useOptimizedFilters ? this.settings.optimizedFilterRulesUrl : this.settings.filterRulesUrl;
         return url.replaceAll('{filter_id}', String(filterId));
     }
