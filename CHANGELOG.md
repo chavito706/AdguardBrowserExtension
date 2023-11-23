@@ -5,20 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
+
+### Fixed
+- Highlighting of `$inline-font` and `$inline-script`
+  [#2609](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2609).
+
+
+## [4.2.226] - 2023-11-22
 
 ### Added
 - Macedonian language support [#2574](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2574).
 
 ### Changed
 - Remove "AdGuard settings..." from context menu on options.html [#2258](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2258)
-- Updated `@adguard/tswebextension` to [v0.4.4](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tswebextension/CHANGELOG.md).
-- Updated `@adguard/tsurlfilter` to [v2.2.5](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/CHANGELOG.md).
+- Updated `@adguard/tswebextension` to [v0.4.6](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tswebextension/CHANGELOG.md).
+- Updated `@adguard/tsurlfilter` to [v2.2.6](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/CHANGELOG.md).
 - Updated `@adguard/filters-downloader` to [v1.1.23](https://github.com/AdguardTeam/FiltersDownloader/blob/master/CHANGELOG.md).
-- Updated `@adguard/scriptlets` to [v1.9.91](https://github.com/AdguardTeam/Scriptlets/blob/master/CHANGELOG.md)
+- Updated `@adguard/scriptlets` to [v1.9.96](https://github.com/AdguardTeam/Scriptlets/blob/master/CHANGELOG.md)
 
 ### Fixed
 - Filtering log not opening on Firefox for Android [#2563](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2536)
+- Firefox Mobile not being correctly picked on a `Report an issue` page [2250](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2250)
+- Filtering log crash on blocking requests, which were already allowlisted from applying `$removeparam`, `$removeheader` or `$csp` rules [#2534](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2534).
 - Do not use `zh-CN` localized metadata for `zh-TW` browser language
   [#2504](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2504)
 - Collect logs only when filtering log is open [#2544](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2544)
@@ -122,7 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `@adguard/tsurlfilter` to [v2.1.7](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/CHANGELOG.md#217---2023-08-10)
 - Updated `@adguard/scriptlets` to [v1.9.62](https://github.com/AdguardTeam/Scriptlets/blob/master/CHANGELOG.md)
 
-[Unreleased]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.209...HEAD
+[Unreleased]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.226...HEAD
+[4.2.226]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.209...v4.2.226
 [4.2.209]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/561737249b2c50c39b8e0ee6eefa5d19726c97b3...v4.2.209
 [4.2.208]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.189...561737249b2c50c39b8e0ee6eefa5d19726c97b3
 [4.2.189]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.168...v4.2.189
