@@ -7,23 +7,30 @@
   resolved "https://registry.yarnpkg.com/@adguard/assistant/-/assistant-4.3.70.tgz#7fdc072315b5ddc797ad91bf06bee3b20e911098"
   integrity sha512-q5o4ejQgRQMFbtV49X1ark0Ytb+MP/3vC9XErHqAcvh6wHpN/Hm2Q1+jbhiHHIs/H2rCU20TyVwZlGs0xtQ60w==
 
-"@adguard/diff-builder@file:../diff-builder/package":
+"@adguard/diff-builder@file:../diff-builder":
   version "0.0.2"
   dependencies:
     axios "^1.6.0"
     commander "^11.1.0"
     diff "5.1.0"
 
-"@adguard/extended-css@^2.0.52":
-  version "2.0.52"
-  resolved "https://registry.yarnpkg.com/@adguard/extended-css/-/extended-css-2.0.52.tgz#f5e7c3df1796deb96404a1b6441e7a4c729f09ac"
-  integrity sha512-T77MnFD/+A3q93MNEq13qPUXPQRBeOUO9LRyqslcaz7jD5qMcikX1nx436u3PXdZXZpa6R0nnwXQ7wwScDmVgw==
+"@adguard/extended-css@^2.0.56":
+  version "2.0.56"
+  resolved "https://registry.yarnpkg.com/@adguard/extended-css/-/extended-css-2.0.56.tgz#4205287fc3e0b4dbf9f64ccad55c56a73e04cef1"
+  integrity sha512-RMPRGZ80kM6KiKRR0K2DUOD0+2CiadBk+G6zYBrRmzk4lD71Cipv2b9/rRy9Fdh41ipoApZsQdbJZozXFsM8RA==
 
-"@adguard/filters-downloader@file:../filters-downloader/package":
+"@adguard/filters-downloader@file:../filters-downloader":
   version "1.2.0"
   dependencies:
-    "@adguard/diff-builder" "file:../diff-builder/package"
     axios "^0.21.1"
+
+"@adguard/scriptlets@^1.9.101":
+  version "1.9.101"
+  resolved "https://registry.yarnpkg.com/@adguard/scriptlets/-/scriptlets-1.9.101.tgz#f18ba3b16b673790e92a6ec66977590cc619ae05"
+  integrity sha512-mqqQ57v/BRVVEYXXmWUPI2S6Fgxj1lj5pC1rA7Sde3QiLyS9CqL29yu9EydXY2QJw9eN9Xw/NsdoXaOEfSd9bA==
+  dependencies:
+    "@babel/runtime" "^7.20.13"
+    js-yaml "^3.13.1"
 
 "@adguard/scriptlets@^1.9.96":
   version "1.9.96"
@@ -38,12 +45,12 @@
   resolved "https://registry.yarnpkg.com/@adguard/translate/-/translate-1.0.2.tgz#e8076902f0950a62d40519d6eb389778516928a0"
   integrity sha512-TeQV4ngse/fcpFDCrtU5VqjZfQsdytSuGT8wF4biIM6c6v6W/tkUdrTDhNItq126hAZe65V8QgipTAp8qHdeZw==
 
-"@adguard/tsurlfilter@^2.2.6":
-  version "2.2.6"
-  resolved "https://registry.yarnpkg.com/@adguard/tsurlfilter/-/tsurlfilter-2.2.6.tgz#4d6af36aa724cae5a69bc98beb76feedf57eb87c"
-  integrity sha512-D7lO95aG1ndudDSZq3dGgcrzfOWBY8sQwGD7PkAn3i0y2paWRYtIXyyVO7V6anraYjs9bQt2RDcqNwU8coFKMg==
+"@adguard/tsurlfilter@^2.2.8":
+  version "2.2.8"
+  resolved "https://registry.yarnpkg.com/@adguard/tsurlfilter/-/tsurlfilter-2.2.8.tgz#b73e8ec3542f5ed546187548e0aa087da36b0928"
+  integrity sha512-izD94LrQcKDgOWe/FQAwpv3c/Xpt9/BDycGGrCdCAJrSvXoqO48UJQn9cev3pipUropHgfsrpSLM5MaFum3H4w==
   dependencies:
-    "@adguard/scriptlets" "^1.9.96"
+    "@adguard/scriptlets" "^1.9.101"
     cidr-tools "^6.4.1"
     commander "9.4.1"
     is-cidr "4.0.2"
@@ -53,15 +60,15 @@
     tldts "5.6.45"
     zod "3.19.1"
 
-"@adguard/tswebextension@^0.4.7":
-  version "0.4.7"
-  resolved "https://registry.yarnpkg.com/@adguard/tswebextension/-/tswebextension-0.4.7.tgz#92aa5d266fcaae2f3edf115da2f773119eb78979"
-  integrity sha512-YE68SPI79a+llLYNoWWRt3L1lB8YgcoEHLWl0XN1fbUe61T9aPUT5eNL3P0OePmqiHDz7ARajnbvoO0NZqO61A==
+"@adguard/tswebextension@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@adguard/tswebextension/-/tswebextension-1.0.5.tgz#9f24304d0c9a6a304451eafeb0f29d0f5cad5846"
+  integrity sha512-5eXySnwRUonc6DFzWRR4WxDwsaH4ZMM3L4Y/vfQlq9YmddFmlCX+jqzJN0WgIX/oZaYIBE1GsjceE1EqS2p4oQ==
   dependencies:
     "@adguard/assistant" "^4.3.70"
-    "@adguard/extended-css" "^2.0.52"
-    "@adguard/scriptlets" "^1.9.96"
-    "@adguard/tsurlfilter" "^2.2.6"
+    "@adguard/extended-css" "^2.0.56"
+    "@adguard/scriptlets" "^1.9.101"
+    "@adguard/tsurlfilter" "^2.2.8"
     bowser "2.11.0"
     commander "11.0.0"
     fs-extra "11.1.1"
@@ -1333,10 +1340,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/webextension-polyfill@^0.8.2":
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/@types/webextension-polyfill/-/webextension-polyfill-0.8.3.tgz#eb601b3fcf524f0ecf7d7579ccbd237928d0dda7"
-  integrity sha512-GN+Hjzy9mXjWoXKmaicTegv3FJ0WFZ3aYz77Wk8TMp1IY3vEzvzj1vnsa0ggV7vMI1i+PUxe4qqnIJKCzf9aTg==
+"@types/webextension-polyfill@^0.10.4":
+  version "0.10.7"
+  resolved "https://registry.yarnpkg.com/@types/webextension-polyfill/-/webextension-polyfill-0.10.7.tgz#de059250599733a60ed26c8a0c81e21e11183b90"
+  integrity sha512-10ql7A0qzBmFB+F+qAke/nP1PIonS0TXZAOMVOxEUsm+lGSW6uwVcISFNa0I4Oyj0884TZVWGGMIWeXOVSNFHw==
 
 "@types/webpack-sources@*":
   version "3.2.0"

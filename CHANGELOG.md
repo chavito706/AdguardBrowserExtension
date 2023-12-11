@@ -8,9 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Info about `@adguard/tswebextension`, `@adguard/tsurlfilter`, `@adguard/extended-css` and `@adguard/scriptlets` versions to the options page's About tab [#2237](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2237)
+
+### Changed
+- Updated `@adguard/tswebextension` to [v1.0.5](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tswebextension/CHANGELOG.md).
+- Updated `@adguard/tsurlfilter` to [v2.2.8](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/CHANGELOG.md).
+- Updated `@adguard/scriptlets` to [v1.9.101](https://github.com/AdguardTeam/Scriptlets/blob/master/CHANGELOG.md)
+
 ### Fixed
+- $$ rules break encoding on some websites [#2249](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2249)
+- TSUrlFilter library loading by Fullscreen User Rules Editor
+  [#2412](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2412).
+- Displaying of Stealth Mode modified cookie rules in Filtering log as "Modified"
+  [#2512](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2512).
 - Highlighting of `$inline-font` and `$inline-script`
   [#2609](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2609).
+- Scriptlets logging in browser console only if Filtering log is opened
+  [#2584](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2584).
+- Filters updating notification styles
+  [#2309](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2309).
+
+
+## [4.2.228] - 2023-11-27
+
+### Fixed
+
+- Logging of cosmetic rules applying.
 
 
 ## [4.2.226] - 2023-11-22
@@ -132,7 +156,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `@adguard/tsurlfilter` to [v2.1.7](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/CHANGELOG.md#217---2023-08-10)
 - Updated `@adguard/scriptlets` to [v1.9.62](https://github.com/AdguardTeam/Scriptlets/blob/master/CHANGELOG.md)
 
-[Unreleased]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.226...HEAD
+[Unreleased]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.228...HEAD
+[4.2.228]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.226...v4.2.228
 [4.2.226]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.209...v4.2.226
 [4.2.209]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/561737249b2c50c39b8e0ee6eefa5d19726c97b3...v4.2.209
 [4.2.208]: https://github.com/AdguardTeam/AdguardBrowserExtension/compare/v4.2.189...561737249b2c50c39b8e0ee6eefa5d19726c97b3
