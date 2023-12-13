@@ -28,6 +28,8 @@ import {
     i18nMetadataValidator,
     localScriptRulesValidator,
 } from '../../schema';
+import { FilterUpdateDetail } from '../filters';
+import { RawFiltersStorage } from '../../storages';
 
 import { NetworkSettings } from './settings';
 
@@ -39,6 +41,9 @@ export type NetworkConfiguration = {
 };
 
 export type ExtensionXMLHttpRequest = XMLHttpRequest & { mozBackgroundRequest: boolean };
+
+// FIXME export from the @adguard/filters-downloader
+export type DownloadResult = { filter: string[], rawFilter: string[] };
 
 /**
  * Api for working with our backend server.
@@ -65,6 +70,9 @@ export class Network {
      */
     private loadingSubscriptions: Record<string, boolean> = {};
 
+    /**
+     *
+     */
     public get conditionsConstants(): DefinedExpressions {
         return this.filterCompilerConditionsConstants;
     }
@@ -72,35 +80,48 @@ export class Network {
     /**
      * Downloads filter rules by filter ID.
      *
-     * @param filterId              Filter identifier.
+     * @param filterUpdateDetail              Filter identifier.
      * @param forceRemote           Force download filter rules from remote server.
      * @param useOptimizedFilters   Download optimized filters flag.
-     * @param keepFilterRaw
      */
     public async downloadFilterRules(
-        filterId: number,
+        filterUpdateDetail: FilterUpdateDetail,
         forceRemote: boolean,
         useOptimizedFilters: boolean,
-        keepFilterRaw: boolean = false,
-    ): Promise<string[]> {
+    ): Promise<DownloadResult> {
         let url: string;
 
-        if (forceRemote || this.settings.localFilterIds.indexOf(filterId) < 0) {
-            url = this.getUrlForDownloadFilterRules(filterId, useOptimizedFilters);
+        if (forceRemote || this.settings.localFilterIds.indexOf(filterUpdateDetail.filterId) < 0) {
+            url = this.getUrlForDownloadFilterRules(filterUpdateDetail.filterId, useOptimizedFilters);
         } else {
-            url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_${filterId}.txt`);
+            url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_${filterUpdateDetail}.txt`);
             if (useOptimizedFilters) {
-                url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_mobile_${filterId}.txt`);
+                // eslint-disable-next-line max-len
+                url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_mobile_${filterUpdateDetail}.txt`);
             }
         }
 
-        if (keepFilterRaw) {
-            return FiltersDownloader.downloadRaw(url);
+        const rawFilter = await RawFiltersStorage.get(filterUpdateDetail.filterId);
+        if (filterUpdateDetail.force || !rawFilter) {
+            return FiltersDownloader.downloadWithRaw(
+                url,
+                {
+                    force: true,
+                    definedExpressions: this.filterCompilerConditionsConstants,
+                },
+            );
         }
 
-        return FiltersDownloader.download(url, this.filterCompilerConditionsConstants);
+        return FiltersDownloader.downloadWithRaw(
+            url,
+            {
+                rawFilter: rawFilter.join('\n'),
+                definedExpressions: this.filterCompilerConditionsConstants,
+            },
+        );
     }
 
+    // FIXME check the case of downloading custom urls
     /**
      * Downloads filter rules by url.
      *

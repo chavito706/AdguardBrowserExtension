@@ -34,6 +34,7 @@ import { network } from '../network';
 
 import { CustomFilterApi } from './custom';
 import { FiltersApi } from './main';
+import { FilterUpdateDetail } from './update';
 
 /**
  * API for managing AdGuard's filters data.
@@ -82,30 +83,31 @@ export class CommonFilterApi {
     /**
      * Update common filter.
      *
-     * @param filterId Filter id.
+     * @param filterUpdateData Filter id.
      *
      * @returns Updated filter metadata or null, if update is not required.
      */
-    public static async updateFilter(filterId: number): Promise<RegularFilterMetadata | null> {
-        Log.info(`Update filter ${filterId}`);
+    public static async updateFilter(filterUpdateData: FilterUpdateDetail): Promise<RegularFilterMetadata | null> {
+        Log.info(`Update filter ${filterUpdateData}`);
 
-        const filterMetadata = CommonFilterApi.getFilterMetadata(filterId);
+        const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateData.filterId);
 
         if (!filterMetadata) {
-            Log.error(`Cannot find filter ${filterId} metadata`);
+            Log.error(`Cannot find filter ${filterUpdateData} metadata`);
             return null;
         }
 
+        // FIXME check if it possible to avoid updating metadata on every update check
         if (!CommonFilterApi.isFilterNeedUpdate(filterMetadata)) {
-            Log.info(`Filter ${filterId} is already updated`);
+            Log.info(`Filter ${filterUpdateData} is already updated`);
             return null;
         }
 
-        Log.info(`Filter ${filterId} is need to updated`);
+        Log.info(`Filter ${filterUpdateData} is need to updated`);
 
         try {
-            await CommonFilterApi.loadFilterRulesFromBackend(filterId, true);
-            Log.info(`Successfully update filter ${filterId}`);
+            await CommonFilterApi.loadFilterRulesFromBackend(filterUpdateData, true);
+            Log.info(`Successfully update filter ${filterUpdateData}`);
             return filterMetadata;
         } catch (e) {
             Log.error(e);
@@ -116,21 +118,29 @@ export class CommonFilterApi {
     /**
      * Download filter rules from backend and update filter state and metadata.
      *
-     * @param filterId Filter id.
+     * @param filterUpdateDetail Filter id.
      * @param remote Whether to download filter rules from remote resources or
      * from local resources.
      */
-    public static async loadFilterRulesFromBackend(filterId: number, remote: boolean): Promise<void> {
+    public static async loadFilterRulesFromBackend(
+        filterUpdateDetail: FilterUpdateDetail,
+        remote: boolean,
+    ): Promise<void> {
         const isOptimized = settingsStorage.get(SettingOption.UseOptimizedFilters);
 
-        const rules = await network.downloadFilterRules(filterId, remote, isOptimized);
-        const rawRules = await network.downloadFilterRules(filterId, remote, isOptimized, true);
+        const {
+            filter,
+            rawFilter,
+        } = await network.downloadFilterRules(filterUpdateDetail, remote, isOptimized);
 
-        await FiltersStorage.set(filterId, rules);
-        await RawFiltersStorage.set(filterId, rawRules);
+        // FIXME if our filter didn't change we shouldn't update it
+        //  if (oldRawFilter == rawFilter) return;
 
-        const currentFilterState = filterStateStorage.get(filterId);
-        filterStateStorage.set(filterId, {
+        await FiltersStorage.set(filterUpdateDetail.filterId, filter);
+        await RawFiltersStorage.set(filterUpdateDetail.filterId, rawFilter);
+
+        const currentFilterState = filterStateStorage.get(filterUpdateDetail.filterId);
+        filterStateStorage.set(filterUpdateDetail.filterId, {
             installed: true,
             loaded: true,
             enabled: !!currentFilterState?.enabled,
@@ -144,9 +154,9 @@ export class CommonFilterApi {
         // be updated.
         // We need to use something like this:
         // const filterMetadata = CustomFilterParser.parseFilterDataFromHeader(rules);
-        const filterMetadata = CommonFilterApi.getFilterMetadata(filterId);
+        const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
         if (!filterMetadata) {
-            throw new Error(`Not found metadata for filter id ${filterId}`);
+            throw new Error(`Not found metadata for filter id ${filterUpdateDetail}`);
         }
 
         const {
@@ -155,7 +165,7 @@ export class CommonFilterApi {
             timeUpdated,
         } = filterMetadata;
 
-        filterVersionStorage.set(filterId, {
+        filterVersionStorage.set(filterUpdateDetail.filterId, {
             version,
             expires: Number(expires),
             lastUpdateTime: new Date(timeUpdated).getTime(),

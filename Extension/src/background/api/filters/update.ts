@@ -29,6 +29,10 @@ import { FilterMetadata, FiltersApi } from './main';
 import { CustomFilterApi } from './custom';
 import { CommonFilterApi } from './common';
 
+// FIXME docs, and better place
+export type FilterUpdateDetail = { filterId: number, force: boolean };
+export type FiltersUpdateDetail = FilterUpdateDetail[];
+
 /**
  * API for manual and automatic (by period) filter rules updates.
  */
@@ -107,11 +111,11 @@ export class FilterUpdateApi {
         const installedAndEnabledFilters = FiltersApi.getInstalledAndEnabledFiltersIds();
 
         // If it is a force check - updates all installed and enabled filters.
-        let filtersIdsToUpdate = installedAndEnabledFilters;
+        let filtersIdsToUpdate:FiltersUpdateDetail = installedAndEnabledFilters.map(id => ({ filterId: id, force: false }));
 
         // If not a force check - updates only outdated filters.
         if (!forceUpdate) {
-            filtersIdsToUpdate = FilterUpdateApi.selectExpiredFilters(updatePeriod, installedAndEnabledFilters);
+            filtersIdsToUpdate = FilterUpdateApi.selectExpiredFilters(updatePeriod, filtersIdsToUpdate);
         }
 
         const updatedFilters = await FilterUpdateApi.updateFilters(filtersIdsToUpdate);
@@ -130,25 +134,25 @@ export class FilterUpdateApi {
      *
      * @returns Promise with a list of updated {@link FilterMetadata filters' metadata}.
      */
-    private static async updateFilters(filtersIds: number[]): Promise<FilterMetadata[]> {
+    private static async updateFilters(filtersIds: FiltersUpdateDetail): Promise<FilterMetadata[]> {
         /**
          * Reload common filters metadata from backend for correct
          * version matching on update check.
          * We do not update metadata on each check if there are no filters or only custom filters.
          */
-        if (filtersIds.some((id) => CommonFilterApi.isCommonFilter(id))) {
+        if (filtersIds.some((data) => CommonFilterApi.isCommonFilter(data.filterId))) {
             await FiltersApi.loadMetadata(true);
         }
 
         const updatedFiltersMetadata: FilterMetadata[] = [];
 
-        const updateTasks = filtersIds.map(async (filterId) => {
+        const updateTasks = filtersIds.map(async (filterData) => {
             let filterMetadata: CustomFilterMetadata | RegularFilterMetadata | null;
 
-            if (CustomFilterApi.isCustomFilter(filterId)) {
-                filterMetadata = await CustomFilterApi.updateFilter(filterId);
+            if (CustomFilterApi.isCustomFilter(filterData.filterId)) {
+                filterMetadata = await CustomFilterApi.updateFilter(filterData);
             } else {
-                filterMetadata = await CommonFilterApi.updateFilter(filterId);
+                filterMetadata = await CommonFilterApi.updateFilter(filterData);
             }
 
             if (filterMetadata) {
@@ -199,15 +203,15 @@ export class FilterUpdateApi {
      * provided filter update period from the settings.
      *
      * @param updatePeriod Period of checking updates in ms.
-     * @param filterIds List of filter ids.
+     * @param filterIds List of filter ids. // FIXME update docs
      *
      * @returns List of outdated filter ids.
      */
-    private static selectExpiredFilters(updatePeriod: number, filterIds: number[]): number[] {
+    private static selectExpiredFilters(updatePeriod: number, filterIds: FiltersUpdateDetail): FiltersUpdateDetail {
         const filtersVersions = filterVersionStorage.getData();
 
-        return filterIds.filter((id: number) => {
-            const filterVersion = filtersVersions[id];
+        return filterIds.filter((data) => {
+            const filterVersion = filtersVersions[data.filterId];
             if (!filterVersion) {
                 return false;
             }

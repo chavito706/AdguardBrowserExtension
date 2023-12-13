@@ -168,17 +168,14 @@ export class FiltersService {
      */
     private static async manualCheckFiltersUpdate(): Promise<FilterMetadata[] | undefined> {
         try {
-            await filterPatchUpdateService.update();
+            const updatedFilters = await FilterUpdateApi.autoUpdateFilters(true);
 
-            return;
-            // const updatedFilters = await FilterUpdateApi.autoUpdateFilters(true);
+            Engine.debounceUpdate();
 
-            // Engine.debounceUpdate();
+            toasts.showFiltersUpdatedAlertMessage(true, updatedFilters);
+            listeners.notifyListeners(listeners.FiltersUpdateCheckReady, updatedFilters);
 
-            // toasts.showFiltersUpdatedAlertMessage(true, updatedFilters);
-            // listeners.notifyListeners(listeners.FiltersUpdateCheckReady, updatedFilters);
-
-            // return updatedFilters;
+            return updatedFilters;
         } catch (e) {
             toasts.showFiltersUpdatedAlertMessage(false);
             listeners.notifyListeners(listeners.FiltersUpdateCheckReady);
