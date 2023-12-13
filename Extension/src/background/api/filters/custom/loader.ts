@@ -15,8 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
  */
-import { network } from '../../network';
+import { DownloadResult, network } from '../../network';
 import { createPromiseWithTimeout } from '../../../utils/timers';
+
+const emptyDownloadResult: DownloadResult = {
+    filter: [],
+    rawFilter: [],
+};
 
 /**
  * Helper class for custom filters downloading with specified request time limitation.
@@ -34,24 +39,9 @@ export class CustomFilterLoader {
      * @throws Error if filter was not downloaded in {@link DOWNLOAD_LIMIT_MS}.
      * @returns Downloaded custom filter rules.
      */
-    public static async downloadRulesWithTimeout(url: string): Promise<string[]> {
+    public static async downloadRulesWithTimeout(url: string): Promise<DownloadResult> {
         return createPromiseWithTimeout(
-            network.downloadFilterRulesBySubscriptionUrl(url, false).then((val) => val || []),
-            CustomFilterLoader.DOWNLOAD_LIMIT_MS,
-            'Fetch timeout is over',
-        );
-    }
-
-    /**
-     * Limits custom filter rules downloading with timeout.
-     *
-     * @param url Custom filter download url.
-     * @throws Error if filter was not downloaded in {@link DOWNLOAD_LIMIT_MS}.
-     * @returns Downloaded custom filter rules.
-     */
-    public static async downloadRawRulesWithTimeout(url: string): Promise<string[]> {
-        return createPromiseWithTimeout(
-            network.downloadFilterRulesBySubscriptionUrl(url, true).then((val) => val || []),
+            network.downloadFilterRulesBySubscriptionUrl(url).then((val) => val || emptyDownloadResult),
             CustomFilterLoader.DOWNLOAD_LIMIT_MS,
             'Fetch timeout is over',
         );

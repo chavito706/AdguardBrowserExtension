@@ -88,7 +88,6 @@
   },
   "dependencies": {
     "@adguard/assistant": "^4.3.70",
-    "@adguard/diff-builder": "/Volumes/dev/diff-builder",
     "@adguard/filters-downloader": "/Volumes/dev/filters-downloader",
     "@adguard/scriptlets": "^1.9.96",
     "@adguard/translate": "^1.0.2",

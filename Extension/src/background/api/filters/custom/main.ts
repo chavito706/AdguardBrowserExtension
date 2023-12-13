@@ -34,6 +34,7 @@ import { network } from '../../network';
 
 import { CustomFilterParsedData, CustomFilterParser } from './parser';
 import { CustomFilterLoader } from './loader';
+import { FilterUpdateDetail } from '../update';
 
 /**
  * Data transfer object for {@link CustomFilterApi} methods.
@@ -276,18 +277,18 @@ export class CustomFilterApi {
      * Checks, if new filter version available.
      * If filter need for update, save new filter data in storages.
      *
-     * @param filterId Custom filter id.
+     * @param filterUpdateDetail Filter update detail.
      *
      * @returns Updated filter metadata or null, if filter is not existed
      * or new version is not available.
      */
-    public static async updateFilter(filterId: number): Promise<CustomFilterMetadata | null> {
-        Log.info(`Update Custom filter ${filterId} ...`);
+    public static async updateFilter(filterUpdateDetail: FilterUpdateDetail): Promise<CustomFilterMetadata | null> {
+        Log.info(`Update Custom filter ${filterUpdateDetail.filterId} ...`);
 
-        const filterMetadata = customFilterMetadataStorage.getById(filterId);
+        const filterMetadata = customFilterMetadataStorage.getById(filterUpdateDetail.filterId);
 
         if (!filterMetadata) {
-            Log.error(`Cannot find custom filter ${filterId} metadata`);
+            Log.error(`Cannot find custom filter ${filterUpdateDetail.filterId} metadata`);
             return null;
         }
 
@@ -296,11 +297,11 @@ export class CustomFilterApi {
         const filterRemoteData = await CustomFilterApi.getRemoteFilterData(customUrl);
 
         if (!CustomFilterApi.isFilterNeedUpdate(filterMetadata, filterRemoteData)) {
-            Log.info(`Custom filter ${filterId} is already updated`);
+            Log.info(`Custom filter ${filterUpdateDetail.filterId} is already updated`);
             return null;
         }
 
-        Log.info(`Successfully update custom filter ${filterId}`);
+        Log.info(`Successfully update custom filter ${filterUpdateDetail.filterId}`);
         return CustomFilterApi.updateFilterData(filterMetadata, filterRemoteData);
     }
 
@@ -389,7 +390,7 @@ export class CustomFilterApi {
      * @param downloadedData.rules New rules.
      * @param downloadedData.checksum New checksum.
      * @param downloadedData.parsed New parsed data.
-     * @param downloadedData.rawRules
+     * @param downloadedData.rawRules New raw rules.
      *
      * @returns Updated custom filter metadata.
      */
@@ -497,8 +498,6 @@ export class CustomFilterApi {
 
         const rules = await CustomFilterLoader.downloadRulesWithTimeout(url);
 
-        const rawRules = await CustomFilterLoader.downloadRawRulesWithTimeout(url);
-
         const parsed = CustomFilterParser.parseFilterDataFromHeader(rules);
 
         const { version } = parsed;
@@ -506,8 +505,8 @@ export class CustomFilterApi {
         const checksum = !version || !BrowserUtils.isSemver(version) ? CustomFilterApi.getChecksum(rules) : null;
 
         return {
-            rawRules,
-            rules,
+            rawRules: rules.rawFilter,
+            rules: rules.filter,
             parsed,
             checksum,
         };

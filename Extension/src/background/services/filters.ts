@@ -42,8 +42,6 @@ import {
 } from '../events';
 import { listeners } from '../notifier';
 
-import { filterPatchUpdateService } from './filter-patch-update';
-
 /**
  * FiltersService creates handlers for messages that relate to filters.
  */

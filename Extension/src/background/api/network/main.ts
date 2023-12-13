@@ -71,13 +71,6 @@ export class Network {
     private loadingSubscriptions: Record<string, boolean> = {};
 
     /**
-     *
-     */
-    public get conditionsConstants(): DefinedExpressions {
-        return this.filterCompilerConditionsConstants;
-    }
-
-    /**
      * Downloads filter rules by filter ID.
      *
      * @param filterUpdateDetail              Filter identifier.
@@ -126,12 +119,8 @@ export class Network {
      * Downloads filter rules by url.
      *
      * @param url Subscription url.
-     * @param keepFilterRaw
      */
-    public async downloadFilterRulesBySubscriptionUrl(
-        url: string,
-        keepFilterRaw: boolean = false,
-    ): Promise<string[] | undefined> {
+    public async downloadFilterRulesBySubscriptionUrl(url: string): Promise<DownloadResult | undefined> {
         if (url in this.loadingSubscriptions) {
             return;
         }
@@ -139,24 +128,25 @@ export class Network {
         this.loadingSubscriptions[url] = true;
 
         try {
-            let lines: string[] = [];
-
-            if (keepFilterRaw) {
-                // TODO: runtime validation
-                lines = await FiltersDownloader.downloadRaw(url);
-            } else {
-                // TODO: runtime validation
-                lines = await FiltersDownloader.download(url, this.filterCompilerConditionsConstants);
-            }
+            // TODO: runtime validation
+            const downloadData = await FiltersDownloader.downloadWithRaw(
+                url,
+                {
+                    definedExpressions: this.filterCompilerConditionsConstants,
+                    force: true,
+                },
+            );
 
             delete this.loadingSubscriptions[url];
 
-            if (lines[0] && lines[0].indexOf('[') === 0) {
-                // [Adblock Plus 2.0]
-                lines.shift();
+            // Get the first rule to check if it is an adblock agent (like [Adblock Plus 2.0]). If so, ignore it.
+            const firstRule = downloadData.filter[0]?.trim();
+
+            if (firstRule && firstRule.startsWith('[') && firstRule.endsWith(']')) {
+                downloadData.filter.shift();
             }
 
-            return lines;
+            return downloadData;
         } catch (e: unknown) {
             delete this.loadingSubscriptions[url];
             const message = e instanceof Error

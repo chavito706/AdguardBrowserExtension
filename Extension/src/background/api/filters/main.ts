@@ -165,7 +165,9 @@ export class FiltersApi {
 
         await FiltersApi.loadMetadata(remote);
 
-        const tasks = unloadedFiltersIds.map((id) => CommonFilterApi.loadFilterRulesFromBackend(id, remote));
+        const tasks = unloadedFiltersIds.map(
+            (id) => CommonFilterApi.loadFilterRulesFromBackend({ filterId: id, force: true }, remote),
+        );
         const promises = await Promise.allSettled(tasks);
 
         // Handles errors
@@ -223,7 +225,14 @@ export class FiltersApi {
 
         await FiltersApi.loadMetadata(true);
 
-        const tasks = commonFilters.map(id => CommonFilterApi.loadFilterRulesFromBackend(id, true));
+        const tasks = commonFilters.map(
+            (id) => CommonFilterApi.loadFilterRulesFromBackend(
+                // 'force' is 'true' here, because when we switch to optimized filters or back, we need to
+                // update all filters.
+                { filterId: id, force: true },
+                true,
+            ),
+        );
         const promises = await Promise.allSettled(tasks);
 
         // Handles errors

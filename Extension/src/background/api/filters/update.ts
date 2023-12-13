@@ -61,7 +61,10 @@ export class FilterUpdateApi {
     public static async checkForFiltersUpdates(filtersIds: number[]): Promise<FilterMetadata[]> {
         const filtersToCheck = FilterUpdateApi.selectFiltersIdsToUpdate(filtersIds);
 
-        const updatedFilters = await FilterUpdateApi.updateFilters(filtersToCheck);
+        const updatedFilters = await FilterUpdateApi.updateFilters(
+            // 'force' is 'true', because we update filters fully when we enable groups.
+            filtersToCheck.map((id) => ({ filterId: id, force: true })),
+        );
 
         filterVersionStorage.refreshLastCheckTime(filtersToCheck);
 
@@ -111,7 +114,9 @@ export class FilterUpdateApi {
         const installedAndEnabledFilters = FiltersApi.getInstalledAndEnabledFiltersIds();
 
         // If it is a force check - updates all installed and enabled filters.
-        let filtersIdsToUpdate:FiltersUpdateDetail = installedAndEnabledFilters.map(id => ({ filterId: id, force: false }));
+        let filtersIdsToUpdate:FiltersUpdateDetail = installedAndEnabledFilters.map(
+            id => ({ filterId: id, force: false }),
+        );
 
         // If not a force check - updates only outdated filters.
         if (!forceUpdate) {
@@ -121,7 +126,9 @@ export class FilterUpdateApi {
         const updatedFilters = await FilterUpdateApi.updateFilters(filtersIdsToUpdate);
 
         // Updates last check time of all installed and enabled filters.
-        filterVersionStorage.refreshLastCheckTime(filtersIdsToUpdate);
+        filterVersionStorage.refreshLastCheckTime(
+            filtersIdsToUpdate.map(({ filterId }) => filterId),
+        );
 
         return updatedFilters;
     }
@@ -130,23 +137,23 @@ export class FilterUpdateApi {
      * Updates the metadata of all filters and updates the filter contents from
      * the provided list of identifiers.
      *
-     * @param filtersIds List of filters ids to update.
+     * @param filtersUpdateDetail List of filters ids to update.
      *
      * @returns Promise with a list of updated {@link FilterMetadata filters' metadata}.
      */
-    private static async updateFilters(filtersIds: FiltersUpdateDetail): Promise<FilterMetadata[]> {
+    private static async updateFilters(filtersUpdateDetail: FiltersUpdateDetail): Promise<FilterMetadata[]> {
         /**
          * Reload common filters metadata from backend for correct
          * version matching on update check.
          * We do not update metadata on each check if there are no filters or only custom filters.
          */
-        if (filtersIds.some((data) => CommonFilterApi.isCommonFilter(data.filterId))) {
+        if (filtersUpdateDetail.some((data) => CommonFilterApi.isCommonFilter(data.filterId))) {
             await FiltersApi.loadMetadata(true);
         }
 
         const updatedFiltersMetadata: FilterMetadata[] = [];
 
-        const updateTasks = filtersIds.map(async (filterData) => {
+        const updateTasks = filtersUpdateDetail.map(async (filterData) => {
             let filterMetadata: CustomFilterMetadata | RegularFilterMetadata | null;
 
             if (CustomFilterApi.isCustomFilter(filterData.filterId)) {
