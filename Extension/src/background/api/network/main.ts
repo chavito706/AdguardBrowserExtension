@@ -29,7 +29,6 @@ import {
     localScriptRulesValidator,
 } from '../../schema';
 import { FilterUpdateDetail } from '../filters';
-import { RawFiltersStorage } from '../../storages';
 
 import { NetworkSettings } from './settings';
 
@@ -63,28 +62,30 @@ export class Network {
     /**
      * Downloads filter rules by filter ID.
      *
-     * @param filterUpdateDetail              Filter identifier.
-     * @param forceRemote           Force download filter rules from remote server.
-     * @param useOptimizedFilters   Download optimized filters flag.
+     * @param filterUpdateDetail Filter identifier.
+     * @param forceRemote Force download filter rules from remote server.
+     * @param useOptimizedFilters Download optimized filters flag.
+     * @param rawFilter Raw filter rules.
      */
     public async downloadFilterRules(
         filterUpdateDetail: FilterUpdateDetail,
         forceRemote: boolean,
         useOptimizedFilters: boolean,
+        rawFilter?: string[],
     ): Promise<DownloadResult> {
         let url: string;
 
         if (forceRemote || this.settings.localFilterIds.indexOf(filterUpdateDetail.filterId) < 0) {
             url = this.getUrlForDownloadFilterRules(filterUpdateDetail.filterId, useOptimizedFilters);
         } else {
-            url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_${filterUpdateDetail}.txt`);
+            // eslint-disable-next-line max-len
+            url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_${filterUpdateDetail.filterId}.txt`);
             if (useOptimizedFilters) {
                 // eslint-disable-next-line max-len
-                url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_mobile_${filterUpdateDetail}.txt`);
+                url = browser.runtime.getURL(`${this.settings.localFiltersFolder}/filter_mobile_${filterUpdateDetail.filterId}.txt`);
             }
         }
 
-        const rawFilter = await RawFiltersStorage.get(filterUpdateDetail.filterId);
         if (filterUpdateDetail.force || !rawFilter) {
             return FiltersDownloader.downloadWithRaw(
                 url,
@@ -104,7 +105,7 @@ export class Network {
         );
     }
 
-    // FIXME check the case of downloading custom urls
+    // FIXME consider the case of downloading custom urls
     /**
      * Downloads filter rules by url.
      *

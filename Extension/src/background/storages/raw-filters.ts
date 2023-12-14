@@ -19,6 +19,8 @@ import zod from 'zod';
 
 import { storage } from './main';
 
+const stringArraySchema = zod.string().array().optional().transform(data => data ?? undefined);
+
 /**
  * Encapsulates interaction with stored filter rules before applying directives.
  */
@@ -43,12 +45,12 @@ export class RawFiltersStorage {
      * @returns Promise, resolved with filter rules strings.
      * @throws Error, if filter list data is not valid.
      */
-    static async get(filterId: number): Promise<string[]> {
+    static async get(filterId: number): Promise<string[] | undefined> {
         const key = RawFiltersStorage.getFilterKey(filterId);
 
         const data = await storage.get(key);
 
-        return zod.string().array().parse(data);
+        return stringArraySchema.parse(data);
     }
 
     /**

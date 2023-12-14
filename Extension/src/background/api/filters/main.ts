@@ -150,14 +150,14 @@ export class FiltersApi {
      * Update metadata from external source and download rules for not installed
      * (not added to the browser storage) filters.
      *
-     * @param filtersIds Filter ids to load.
+     * @param filterIds Filter ids to load.
      * @param remote Whether to download metadata and filter rules from remote
      * resources or from local resources.
      */
-    public static async loadFilters(filtersIds: number[], remote: boolean): Promise<void> {
+    public static async loadFilters(filterIds: number[], remote: boolean): Promise<void> {
         // Ignore loaded filters
-        // Custom filters always has loaded state, so we don't need additional check
-        const unloadedFiltersIds = filtersIds.filter((id) => !FiltersApi.isFilterRulesIsLoaded(id));
+        // Custom filters always have loaded state, so we don't need additional check
+        const unloadedFiltersIds = filterIds.filter((id) => !FiltersApi.isFilterRulesIsLoaded(id));
 
         if (unloadedFiltersIds.length === 0) {
             return;
@@ -182,24 +182,23 @@ export class FiltersApi {
      * Loads and enables specified filters. Once the filters are enabled,
      * the untouched groups belonging to those filters will be enabled too.
      *
-     * @param filtersIds Filters ids.
+     * @param filterIds Filters ids.
      * @param remote Whether to download metadata and filter rules from remote
      * resources or from local resources.
      */
-    public static async loadAndEnableFilters(filtersIds: number[], remote = false): Promise<void> {
-        await FiltersApi.loadFilters(filtersIds, remote);
+    public static async loadAndEnableFilters(filterIds: number[], remote = false): Promise<void> {
+        await FiltersApi.loadFilters(filterIds, remote);
 
-        filterStateStorage.enableFilters(filtersIds);
+        filterStateStorage.enableFilters(filterIds);
 
         if (!remote) {
-            // Checks for updates to enabled filters, unless it is a load from
-            // remote resources, as in this case the filters are already
-            // up to date.
-            await FilterUpdateApi.checkForFiltersUpdates(filtersIds);
+            // Update the enabled filters only if loading from local resources,
+            // because when loading from remote resources, the filters are already up-to-date.
+            await FilterUpdateApi.checkForFiltersUpdates(filterIds);
         }
 
         // we enable filters groups if it was never enabled or disabled early
-        FiltersApi.enableGroupsWereNotTouched(filtersIds);
+        FiltersApi.enableGroupsWereNotTouched(filterIds);
     }
 
     /**

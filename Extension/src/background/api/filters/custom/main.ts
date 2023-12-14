@@ -31,10 +31,10 @@ import {
 } from '../../../storages';
 import { Engine } from '../../../engine';
 import { network } from '../../network';
+import { FilterUpdateDetail } from '../update';
 
 import { CustomFilterParsedData, CustomFilterParser } from './parser';
 import { CustomFilterLoader } from './loader';
-import { FilterUpdateDetail } from '../update';
 
 /**
  * Data transfer object for {@link CustomFilterApi} methods.
@@ -137,7 +137,7 @@ export class CustomFilterApi {
      * One of three options:
      * - {@link CreateCustomFilterResponse} on new filter subscription,
      * - {@link CustomFilterAlreadyExistResponse} if custom filter was added before
-     * - null, if filter rules is not downloaded.
+     * - null, if filter rules are not downloaded.
      */
     public static async getFilterInfo(url: string, title?: string): Promise<GetCustomFilterInfoResult> {
         // Check if filter from this url was added before
@@ -151,14 +151,14 @@ export class CustomFilterApi {
             return null;
         }
 
-        const parsedData = CustomFilterParser.parseFilterDataFromHeader(rules);
+        const parsedData = CustomFilterParser.parseFilterDataFromHeader(rules.filter);
 
         const filter = {
             ...parsedData,
             name: parsedData.name ? parsedData.name : title as string,
             timeUpdated: parsedData.timeUpdated ? parsedData.timeUpdated : new Date().toISOString(),
             customUrl: url,
-            rulesCount: rules.filter(rule => rule.trim().indexOf('!') !== 0).length,
+            rulesCount: rules.filter.filter(rule => rule.trim().indexOf('!') !== 0).length,
         };
 
         return { filter };
@@ -496,17 +496,18 @@ export class CustomFilterApi {
     private static async getRemoteFilterData(url: string): Promise<GetRemoteCustomFilterResult> {
         Log.info(`Get custom filter data from ${url}`);
 
-        const rules = await CustomFilterLoader.downloadRulesWithTimeout(url);
+        // FIXME somewhere save raw filter
+        const { filter, rawFilter } = await CustomFilterLoader.downloadRulesWithTimeout(url);
 
-        const parsed = CustomFilterParser.parseFilterDataFromHeader(rules);
+        const parsed = CustomFilterParser.parseFilterDataFromHeader(filter);
 
         const { version } = parsed;
 
-        const checksum = !version || !BrowserUtils.isSemver(version) ? CustomFilterApi.getChecksum(rules) : null;
+        const checksum = !version || !BrowserUtils.isSemver(version) ? CustomFilterApi.getChecksum(filter) : null;
 
         return {
-            rawRules: rules.rawFilter,
-            rules: rules.filter,
+            rawRules: rawFilter,
+            rules: filter,
             parsed,
             checksum,
         };

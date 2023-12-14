@@ -66,7 +66,7 @@ describe('Filter Update API should', () => {
     let storage: Storage.StorageArea;
 
     // Groups test with real timers
-    describe('', () => {
+    describe('tests with real timers', () => {
         beforeEach(async () => {
             storage = mockLocalStorage({
                 [APP_VERSION_KEY]: '4.2.0.0',

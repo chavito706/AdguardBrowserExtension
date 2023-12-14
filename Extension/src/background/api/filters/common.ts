@@ -119,22 +119,26 @@ export class CommonFilterApi {
      * Download filter rules from backend and update filter state and metadata.
      *
      * @param filterUpdateDetail Filter id.
-     * @param remote Whether to download filter rules from remote resources or
+     * @param forceRemote Whether to download filter rules from remote resources or
      * from local resources.
      */
     public static async loadFilterRulesFromBackend(
         filterUpdateDetail: FilterUpdateDetail,
-        remote: boolean,
+        forceRemote: boolean,
     ): Promise<void> {
+        // FIXME check work work optimized filters
         const isOptimized = settingsStorage.get(SettingOption.UseOptimizedFilters);
+        const oldRawFilter = await RawFiltersStorage.get(filterUpdateDetail.filterId);
 
         const {
             filter,
             rawFilter,
-        } = await network.downloadFilterRules(filterUpdateDetail, remote, isOptimized);
+        } = await network.downloadFilterRules(filterUpdateDetail, forceRemote, isOptimized, oldRawFilter);
 
-        // FIXME if our filter didn't change we shouldn't update it
-        //  if (oldRawFilter == rawFilter) return;
+        if (oldRawFilter === rawFilter) {
+            Log.info(`Filter ${filterUpdateDetail} is already updated`);
+            return;
+        }
 
         await FiltersStorage.set(filterUpdateDetail.filterId, filter);
         await RawFiltersStorage.set(filterUpdateDetail.filterId, rawFilter);
