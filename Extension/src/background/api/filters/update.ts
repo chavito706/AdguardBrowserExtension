@@ -241,7 +241,7 @@ export class FilterUpdateApi {
         return filterUpdateDetails.filter((data) => {
             const filterVersion = filterVersions[data.filterId];
             if (!filterVersion) {
-                return false;
+                return true;
             }
 
             const { lastCheckTime, expires } = filterVersion;
