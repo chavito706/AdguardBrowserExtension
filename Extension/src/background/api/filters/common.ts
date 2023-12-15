@@ -83,31 +83,31 @@ export class CommonFilterApi {
     /**
      * Update common filter.
      *
-     * @param filterUpdateData Filter id.
+     * @param filterUpdateDetail Filter id.
      *
      * @returns Updated filter metadata or null, if update is not required.
      */
-    public static async updateFilter(filterUpdateData: FilterUpdateDetail): Promise<RegularFilterMetadata | null> {
-        Log.info(`Update filter ${filterUpdateData}`);
+    public static async updateFilter(filterUpdateDetail: FilterUpdateDetail): Promise<RegularFilterMetadata | null> {
+        Log.info(`Update filter ${filterUpdateDetail.filterId}`);
 
-        const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateData.filterId);
+        const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
 
         if (!filterMetadata) {
-            Log.error(`Cannot find filter ${filterUpdateData} metadata`);
+            Log.error(`Cannot find filter ${filterUpdateDetail.filterId} metadata`);
             return null;
         }
 
         // FIXME check if it possible to avoid updating metadata on every update check
         if (!CommonFilterApi.isFilterNeedUpdate(filterMetadata)) {
-            Log.info(`Filter ${filterUpdateData} is already updated`);
+            Log.info(`Filter ${filterUpdateDetail.filterId} is already updated`);
             return null;
         }
 
-        Log.info(`Filter ${filterUpdateData} is need to updated`);
+        Log.info(`Filter ${filterUpdateDetail.filterId} is need to updated`);
 
         try {
-            await CommonFilterApi.loadFilterRulesFromBackend(filterUpdateData, true);
-            Log.info(`Successfully update filter ${filterUpdateData}`);
+            await CommonFilterApi.loadFilterRulesFromBackend(filterUpdateDetail, true);
+            Log.info(`Filter ${filterUpdateDetail.filterId} updated successfully`);
             return filterMetadata;
         } catch (e) {
             Log.error(e);
@@ -136,7 +136,7 @@ export class CommonFilterApi {
         } = await network.downloadFilterRules(filterUpdateDetail, forceRemote, isOptimized, oldRawFilter);
 
         if (oldRawFilter === rawFilter) {
-            Log.info(`Filter ${filterUpdateDetail} is already updated`);
+            Log.info(`Filter ${filterUpdateDetail.filterId} is already updated`);
             return;
         }
 
@@ -160,7 +160,7 @@ export class CommonFilterApi {
         // const filterMetadata = CustomFilterParser.parseFilterDataFromHeader(rules);
         const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
         if (!filterMetadata) {
-            throw new Error(`Not found metadata for filter id ${filterUpdateDetail}`);
+            throw new Error(`Not found metadata for filter id ${filterUpdateDetail.filterId}`);
         }
 
         const {

@@ -294,7 +294,13 @@ export class CustomFilterApi {
 
         const { customUrl } = filterMetadata;
 
-        const filterRemoteData = await CustomFilterApi.getRemoteFilterData(customUrl);
+        const rawFilterLines = await RawFiltersStorage.get(filterUpdateDetail.filterId) || [];
+        const rawFilter = rawFilterLines.join('\n');
+        const filterRemoteData = await CustomFilterApi.getRemoteFilterData(
+            customUrl,
+            rawFilter,
+            filterUpdateDetail.force,
+        );
 
         if (!CustomFilterApi.isFilterNeedUpdate(filterMetadata, filterRemoteData)) {
             Log.info(`Custom filter ${filterUpdateDetail.filterId} is already updated`);
@@ -491,23 +497,30 @@ export class CustomFilterApi {
      *
      * @param url Custom filter subscription url.
      *
+     * @param rawFilter Optional raw filter rules.
+     * @param force If true filter data will be downloaded directly, not through patches.
      * @returns Downloaded and parsed filter data.
      */
-    private static async getRemoteFilterData(url: string): Promise<GetRemoteCustomFilterResult> {
+    private static async getRemoteFilterData(
+        url: string,
+        rawFilter?: string,
+        force?: boolean,
+    ): Promise<GetRemoteCustomFilterResult> {
         Log.info(`Get custom filter data from ${url}`);
 
-        // FIXME somewhere save raw filter
-        const { filter, rawFilter } = await CustomFilterLoader.downloadRulesWithTimeout(url);
+        const downloadResult = await CustomFilterLoader.downloadRulesWithTimeout(url, rawFilter, force);
 
-        const parsed = CustomFilterParser.parseFilterDataFromHeader(filter);
+        const parsed = CustomFilterParser.parseFilterDataFromHeader(downloadResult.filter);
 
         const { version } = parsed;
 
-        const checksum = !version || !BrowserUtils.isSemver(version) ? CustomFilterApi.getChecksum(filter) : null;
+        const checksum = !version || !BrowserUtils.isSemver(version)
+            ? CustomFilterApi.getChecksum(downloadResult.filter)
+            : null;
 
         return {
-            rawRules: rawFilter,
-            rules: filter,
+            rawRules: downloadResult.rawFilter,
+            rules: downloadResult.filter,
             parsed,
             checksum,
         };

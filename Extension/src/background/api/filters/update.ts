@@ -24,6 +24,7 @@ import {
 import { DEFAULT_FILTERS_UPDATE_PERIOD } from '../../../common/settings';
 import { Log } from '../../../common/log';
 import { FiltersUpdateTime } from '../../../common/constants';
+import { Engine } from '../../engine';
 
 import { FilterMetadata, FiltersApi } from './main';
 import { CustomFilterApi } from './custom';
@@ -131,7 +132,7 @@ export class FilterUpdateApi {
 
         // If it is a force check - updates all installed and enabled filters.
         let filtersIdsToUpdate:FilterUpdateDetails = installedAndEnabledFilters.map(
-            id => ({ filterId: id, force: false }),
+            id => ({ filterId: id, force: forceUpdate }),
         );
 
         // If not a force check - updates only outdated filters.
@@ -145,6 +146,11 @@ export class FilterUpdateApi {
         filterVersionStorage.refreshLastCheckTime(
             filtersIdsToUpdate.map(({ filterId }) => filterId),
         );
+
+        // If some filters were updated, then it is time to update the engine.
+        if (updatedFilters.length > 0) {
+            Engine.debounceUpdate();
+        }
 
         return updatedFilters;
     }

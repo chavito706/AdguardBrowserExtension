@@ -38,12 +38,19 @@ export class CustomFilterLoader {
      * Limits custom filter rules downloading with timeout.
      *
      * @param url Custom filter download url.
+     * @param rawFilter Optional raw filter rules.
+     * @param force Optional flag to choose download filter in whole or by patches.
      * @throws Error if filter was not downloaded in {@link DOWNLOAD_LIMIT_MS}.
      * @returns Downloaded custom filter rules.
      */
-    public static async downloadRulesWithTimeout(url: string): Promise<DownloadResult> {
+    public static async downloadRulesWithTimeout(
+        url: string,
+        rawFilter?: string,
+        force?: boolean,
+    ): Promise<DownloadResult> {
         return createPromiseWithTimeout(
-            network.downloadFilterRulesBySubscriptionUrl(url).then((val) => val || emptyDownloadResult),
+            network.downloadFilterRulesBySubscriptionUrl(url, rawFilter, force)
+                .then((val) => val || emptyDownloadResult),
             CustomFilterLoader.DOWNLOAD_LIMIT_MS,
             'Fetch timeout is over',
         );

@@ -6,7 +6,7 @@ describe('network', () => {
         // This mock needs to simulate external request in the filters downloader
         const mockNetworkRequestPrefix = 'mock:/';
         const filePath = `${mockNetworkRequestPrefix}${mockFilterPath}`;
-        const { filter } = await network.downloadFilterRulesBySubscriptionUrl(filePath);
+        const { filter } = (await network.downloadFilterRulesBySubscriptionUrl(filePath))!;
         expect(filter).toHaveLength(2);
     });
 });

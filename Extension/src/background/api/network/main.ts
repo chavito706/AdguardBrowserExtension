@@ -105,13 +105,18 @@ export class Network {
         );
     }
 
-    // FIXME consider the case of downloading custom urls
     /**
      * Downloads filter rules by url.
      *
      * @param url Subscription url.
+     * @param rawFilter Raw filter rules.
+     * @param force Boolean flag to download filter fully or by patches.
      */
-    public async downloadFilterRulesBySubscriptionUrl(url: string): Promise<DownloadResult | undefined> {
+    public async downloadFilterRulesBySubscriptionUrl(
+        url: string,
+        rawFilter?: string,
+        force?: boolean,
+    ): Promise<DownloadResult | undefined> {
         if (url in this.loadingSubscriptions) {
             return;
         }
@@ -124,7 +129,8 @@ export class Network {
                 url,
                 {
                     definedExpressions: this.filterCompilerConditionsConstants,
-                    force: true,
+                    force,
+                    rawFilter,
                 },
             );
 
