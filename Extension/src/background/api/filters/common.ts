@@ -97,7 +97,6 @@ export class CommonFilterApi {
             return null;
         }
 
-        // FIXME check if it possible to avoid updating metadata on every update check
         if (!CommonFilterApi.isFilterNeedUpdate(filterMetadata)) {
             Log.info(`Filter ${filterUpdateDetail.filterId} is already updated`);
             return null;
