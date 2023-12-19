@@ -33,12 +33,6 @@ export const baseMetadataValidator = zod.object({
      */
     expires: zod.number(),
     /**
-     * The time in seconds during which the filter content remains fresh
-     * and does not need to be updated using differential updates.
-     * Used to auto-renew filters.
-     */
-    diffExpiresSeconds: zod.number().optional(),
-    /**
      * Id of the filter.
      */
     filterId: zod.number(),
@@ -64,6 +58,12 @@ export const baseMetadataValidator = zod.object({
      * version.
      */
     version: zod.string(),
+
+    /**
+     * Diff-Path - Path to the patches if exists
+     * {@link https://github.com/ameshkov/diffupdates/tree/b81243c50d23e0a8be0fe95a80d55abd00b08981?tab=readme-ov-file#-diff-path Specs}.
+     */
+    diffPath: zod.string().optional(),
 });
 
 export const regularFilterMetadataValidator = baseMetadataValidator.merge(

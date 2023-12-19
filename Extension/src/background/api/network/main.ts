@@ -16,7 +16,11 @@
  * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
  */
 import browser from 'webextension-polyfill';
-import FiltersDownloader, { DefinedExpressions, type DownloadResult } from '@adguard/filters-downloader/browser';
+import {
+    FiltersDownloader,
+    DefinedExpressions,
+    type DownloadResult,
+} from '@adguard/filters-downloader/browser';
 
 import { LOCALE_METADATA_FILE_NAME, LOCALE_I18N_METADATA_FILE_NAME } from '../../../../../constants';
 import { UserAgent } from '../../../common/user-agent';
@@ -87,13 +91,14 @@ export class Network {
         }
 
         if (filterUpdateDetail.force || !rawFilter) {
-            return FiltersDownloader.downloadWithRaw(
+            const result = await FiltersDownloader.downloadWithRaw(
                 url,
                 {
                     force: true,
                     definedExpressions: this.filterCompilerConditionsConstants,
                 },
             );
+            return result;
         }
 
         return FiltersDownloader.downloadWithRaw(

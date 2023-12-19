@@ -32,8 +32,8 @@ import {
 import { Engine } from '../../../engine';
 import { network } from '../../network';
 import { FilterUpdateDetail } from '../update';
+import { FilterParsedData, FilterParser } from '../parser';
 
-import { CustomFilterParsedData, CustomFilterParser } from './parser';
 import { CustomFilterLoader } from './loader';
 
 /**
@@ -50,7 +50,7 @@ export type CustomFilterDTO = {
  * Full info about downloaded custom filter, returned
  * in 'Add custom filter' modal window if filter was not added before.
  */
-export type CustomFilterInfo = CustomFilterParsedData & {
+export type CustomFilterInfo = FilterParsedData & {
     customUrl: string,
     rulesCount: number,
 };
@@ -84,7 +84,7 @@ export type GetRemoteCustomFilterResult = {
     rawRules: string[],
     rules: string[],
     checksum: string | null,
-    parsed: CustomFilterParsedData,
+    parsed: FilterParsedData,
 };
 
 /**
@@ -151,7 +151,7 @@ export class CustomFilterApi {
             return null;
         }
 
-        const parsedData = CustomFilterParser.parseFilterDataFromHeader(rules.filter);
+        const parsedData = FilterParser.parseFilterDataFromHeader(rules.filter);
 
         const filter = {
             ...parsedData,
@@ -172,8 +172,8 @@ export class CustomFilterApi {
      * Based on parsed data.
      * Create new {@link FilterState} and save it in {@link filterStateStorage}.
      * Create new {@link FilterVersionData} and save it in {@link filterVersionStorage}.
-     * Filters rules is saved in {@link FiltersStorage}.
-     * Raw filter rules (before applying directives) is saved in {@link RawFiltersStorage}.
+     * Filters rules are saved in {@link FiltersStorage}.
+     * Raw filter rules (before applying directives) are saved in {@link RawFiltersStorage}.
      *
      * If the custom filter group has never been enabled, turn it on.
      *
@@ -252,7 +252,7 @@ export class CustomFilterApi {
     }
 
     /**
-     * Creates new custom filters from passed DTO array.
+     * Creates new custom filters from the passed DTO array.
      *
      * @param filtersData Array of {@link CustomFilterDTO}.
      */
@@ -510,7 +510,7 @@ export class CustomFilterApi {
 
         const downloadResult = await CustomFilterLoader.downloadRulesWithTimeout(url, rawFilter, force);
 
-        const parsed = CustomFilterParser.parseFilterDataFromHeader(downloadResult.filter);
+        const parsed = FilterParser.parseFilterDataFromHeader(downloadResult.filter);
 
         const { version } = parsed;
 

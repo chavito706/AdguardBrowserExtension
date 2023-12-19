@@ -217,10 +217,10 @@ export class FiltersApi {
      *
      */
     public static async reloadEnabledFilters(): Promise<void> {
-        const filtersIds = FiltersApi.getEnabledFilters();
+        const filterIds = FiltersApi.getEnabledFilters();
 
         // Ignore custom filters
-        const commonFilters = filtersIds.filter(id => CommonFilterApi.isCommonFilter(id));
+        const commonFilters = filterIds.filter(id => CommonFilterApi.isCommonFilter(id));
 
         await FiltersApi.loadMetadata(true);
 
@@ -241,7 +241,7 @@ export class FiltersApi {
             }
         });
 
-        filterStateStorage.enableFilters(filtersIds);
+        filterStateStorage.enableFilters(filterIds);
     }
 
     /**

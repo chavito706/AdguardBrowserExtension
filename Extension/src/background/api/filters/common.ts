@@ -35,6 +35,7 @@ import { network } from '../network';
 import { CustomFilterApi } from './custom';
 import { FiltersApi } from './main';
 import { FilterUpdateDetail } from './update';
+import { FilterParser } from './parser';
 
 /**
  * API for managing AdGuard's filters data.
@@ -134,11 +135,6 @@ export class CommonFilterApi {
             rawFilter,
         } = await network.downloadFilterRules(filterUpdateDetail, forceRemote, isOptimized, oldRawFilter);
 
-        if (oldRawFilter === rawFilter) {
-            Log.info(`Filter ${filterUpdateDetail.filterId} is already updated`);
-            return;
-        }
-
         await FiltersStorage.set(filterUpdateDetail.filterId, filter);
         await RawFiltersStorage.set(filterUpdateDetail.filterId, rawFilter);
 
@@ -149,18 +145,17 @@ export class CommonFilterApi {
             enabled: !!currentFilterState?.enabled,
         });
 
-        // TODO: We should retrieve metadata from the actual rules loaded, but
-        // not from the metadata repository, because the metadata may be
-        // the newest (loaded from a remote source) and the filter may be loaded
-        // from local resources and have an expired version. But in the current
-        // flow, we will think that the filter is the newest and doesn't need to
-        // be updated.
-        // We need to use something like this:
-        // const filterMetadata = CustomFilterParser.parseFilterDataFromHeader(rules);
-        const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
-        if (!filterMetadata) {
+        const parsedMetadata = FilterParser.parseFilterDataFromHeader(filter);
+        let filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
+        if (!(parsedMetadata && filterMetadata)) {
             throw new Error(`Not found metadata for filter id ${filterUpdateDetail.filterId}`);
         }
+
+        // update filter metadata with new values
+        filterMetadata = {
+            ...filterMetadata,
+            ...parsedMetadata,
+        };
 
         const {
             version,

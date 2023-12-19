@@ -114,7 +114,7 @@ export class FilterUpdateApi {
      * or not.
      */
     public static async autoUpdateFilters(forceUpdate: boolean = false): Promise<FilterMetadata[]> {
-        // If filtering is disabled and it is not a forced update, it does nothing.
+        // If filtering is disabled, and it is not a forced update, it does nothing.
         const filteringDisabled = settingsStorage.get(SettingOption.DisableFiltering);
         if (filteringDisabled && !forceUpdate) {
             return [];
@@ -137,7 +137,7 @@ export class FilterUpdateApi {
 
         // If not a force check - updates only outdated filters.
         if (!forceUpdate) {
-            filtersIdsToUpdate = FilterUpdateApi.selectExpiredFilters(updatePeriod, filtersIdsToUpdate);
+            filtersIdsToUpdate = FilterUpdateApi.selectFiltersForUpdating(updatePeriod, filtersIdsToUpdate);
         }
 
         const updatedFilters = await FilterUpdateApi.updateFilters(filtersIdsToUpdate);
@@ -230,21 +230,28 @@ export class FilterUpdateApi {
     }
 
     /**
-     * Selects only outdated filters from the provided filter list, based on the
+     * Selects outdated filters from the provided filter list, based on the
      * provided filter update period from the settings.
+     * Also, if filter has DiffPath, we update it without checking expires value.
      *
      * @param updatePeriod Period of checking updates in ms.
      * @param filterUpdateDetails List of filter update details.
      *
      * @returns List of outdated filter ids.
      */
-    private static selectExpiredFilters(
+    private static selectFiltersForUpdating(
         updatePeriod: number,
         filterUpdateDetails: FilterUpdateDetails,
     ): FilterUpdateDetails {
         const filterVersions = filterVersionStorage.getData();
 
         return filterUpdateDetails.filter((data) => {
+            // if filter contains Diff-Path in the metadata, we try to update it via patches in any way
+            const metadata = FiltersApi.getFilterMetadata(data.filterId);
+            if (metadata?.diffPath) {
+                return true;
+            }
+
             const filterVersion = filterVersions[data.filterId];
             if (!filterVersion) {
                 return true;
