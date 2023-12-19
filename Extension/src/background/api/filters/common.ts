@@ -126,7 +126,6 @@ export class CommonFilterApi {
         filterUpdateDetail: FilterUpdateDetail,
         forceRemote: boolean,
     ): Promise<void> {
-        // FIXME check work work optimized filters
         const isOptimized = settingsStorage.get(SettingOption.UseOptimizedFilters);
         const oldRawFilter = await RawFiltersStorage.get(filterUpdateDetail.filterId);
 
