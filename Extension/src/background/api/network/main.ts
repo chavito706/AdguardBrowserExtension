@@ -33,6 +33,7 @@ import {
     localScriptRulesValidator,
 } from '../../schema';
 import { FilterUpdateDetail } from '../filters';
+import { Log } from '../../../common/log';
 
 import { NetworkSettings } from './settings';
 
@@ -96,6 +97,7 @@ export class Network {
                 {
                     force: true,
                     definedExpressions: this.filterCompilerConditionsConstants,
+                    verbose: Log.isVerbose(),
                 },
             );
             return result;
@@ -106,6 +108,7 @@ export class Network {
             {
                 rawFilter: rawFilter.join('\n'),
                 definedExpressions: this.filterCompilerConditionsConstants,
+                verbose: Log.isVerbose(),
             },
         );
     }
@@ -136,6 +139,7 @@ export class Network {
                     definedExpressions: this.filterCompilerConditionsConstants,
                     force,
                     rawFilter,
+                    verbose: Log.isVerbose(),
                 },
             );
 
