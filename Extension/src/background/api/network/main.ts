@@ -67,7 +67,7 @@ export class Network {
     /**
      * Downloads filter rules by filter ID.
      *
-     * @param filterUpdateDetail Filter identifier.
+     * @param filterUpdateDetail Filter update detail.
      * @param forceRemote Force download filter rules from remote server.
      * @param useOptimizedFilters Download optimized filters flag.
      * @param rawFilter Raw filter rules.

@@ -84,7 +84,7 @@ export class CommonFilterApi {
     /**
      * Update common filter.
      *
-     * @param filterUpdateDetail Filter id.
+     * @param filterUpdateDetail Filter update detail.
      *
      * @returns Updated filter metadata or null, if update is not required.
      */
@@ -118,7 +118,7 @@ export class CommonFilterApi {
     /**
      * Download filter rules from backend and update filter state and metadata.
      *
-     * @param filterUpdateDetail Filter id.
+     * @param filterUpdateDetail Filter update detail.
      * @param forceRemote Whether to download filter rules from remote resources or
      * from local resources.
      */
