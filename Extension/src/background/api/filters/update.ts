@@ -71,7 +71,7 @@ export class FilterUpdateApi {
      * a filter is enabled from the Stealth menu);
      * - when the language filter is automatically turned on.
      *
-     * @param filterIds List of filters ids to check.
+     * @param filterIds List of filter ids to check.
      *
      * @returns List of metadata for updated filters.
      */

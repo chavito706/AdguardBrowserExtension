@@ -135,7 +135,7 @@ export class FilterStateStorage extends StringStorage<
     /**
      * Enables specified filters.
      *
-     * @param filterIds List of filters to enable.
+     * @param filterIds List of filter ids to enable.
      * @throws Error if filter state data is not initialized.
      */
     public enableFilters(filterIds: number[]): void {

@@ -87,7 +87,7 @@ export class FilterVersionStorage extends StringStorage<
     /**
      * Update last check time stamp for specified filters with current time.
      *
-     * @param filterIds List of filters ids.
+     * @param filterIds List of filter ids.
      * @throws Error if filter version data is not initialized.
      */
     public refreshLastCheckTime(filterIds: number[]): void {

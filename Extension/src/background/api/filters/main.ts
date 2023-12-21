@@ -182,7 +182,7 @@ export class FiltersApi {
      * Loads and enables specified filters. Once the filters are enabled,
      * the untouched groups belonging to those filters will be enabled too.
      *
-     * @param filterIds Filters ids.
+     * @param filterIds Filter ids.
      * @param remote Whether to download metadata and filter rules from remote
      * resources or from local resources.
      */
