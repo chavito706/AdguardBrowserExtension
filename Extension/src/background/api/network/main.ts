@@ -34,6 +34,7 @@ import {
 } from '../../schema';
 import { FilterUpdateDetail } from '../filters';
 import { Log } from '../../../common/log';
+import { NEWLINE_CHAR_UNIX } from '../../../common/constants';
 
 import { NetworkSettings } from './settings';
 
@@ -106,7 +107,7 @@ export class Network {
         return FiltersDownloader.downloadWithRaw(
             url,
             {
-                rawFilter: rawFilter.join('\n'),
+                rawFilter: rawFilter.join(NEWLINE_CHAR_UNIX),
                 definedExpressions: this.filterCompilerConditionsConstants,
                 verbose: Log.isVerbose(),
             },

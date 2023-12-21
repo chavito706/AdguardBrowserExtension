@@ -19,7 +19,11 @@ import MD5 from 'crypto-js/md5';
 
 import { BrowserUtils } from '../../../utils/browser-utils';
 import { Log } from '../../../../common/log';
-import { AntibannerGroupsId, CUSTOM_FILTERS_START_ID } from '../../../../common/constants';
+import {
+    AntibannerGroupsId,
+    CUSTOM_FILTERS_START_ID,
+    NEWLINE_CHAR_UNIX,
+} from '../../../../common/constants';
 import { CustomFilterMetadata, customFilterMetadataStorageDataValidator } from '../../../schema';
 import {
     customFilterMetadataStorage,
@@ -295,7 +299,7 @@ export class CustomFilterApi {
         const { customUrl } = filterMetadata;
 
         const rawFilterLines = await RawFiltersStorage.get(filterUpdateDetail.filterId) || [];
-        const rawFilter = rawFilterLines.join('\n');
+        const rawFilter = rawFilterLines.join(NEWLINE_CHAR_UNIX);
         const filterRemoteData = await CustomFilterApi.getRemoteFilterData(
             customUrl,
             rawFilter,
