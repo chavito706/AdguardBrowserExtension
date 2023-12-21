@@ -272,6 +272,7 @@ export class SettingsApi {
 
         if (allowAcceptableAds) {
             await CommonFilterApi.loadFilterRulesFromBackend(
+                // since this is called on settings import, we use force, to update filters without patches
                 { filterId: AntiBannerFiltersId.SearchAndSelfPromoFilterId, force: false },
                 false,
             );
