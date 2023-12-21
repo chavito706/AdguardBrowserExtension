@@ -166,6 +166,7 @@ export class FiltersApi {
         await FiltersApi.loadMetadata(remote);
 
         const tasks = unloadedFiltersIds.map(
+            // force here to get filters without patches
             (id) => CommonFilterApi.loadFilterRulesFromBackend({ filterId: id, force: true }, remote),
         );
         const promises = await Promise.allSettled(tasks);
