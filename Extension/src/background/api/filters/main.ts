@@ -215,7 +215,6 @@ export class FiltersApi {
     /**
      * Force reload enabled common filters metadata and rules from backend.
      * Called on "use optimized filters" setting switch.
-     *
      */
     public static async reloadEnabledFilters(): Promise<void> {
         const filterIds = FiltersApi.getEnabledFilters();
