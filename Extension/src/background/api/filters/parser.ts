@@ -23,7 +23,7 @@ export type FilterParsedData = {
     expires: number,
     timeUpdated: string,
     // Spec https://github.com/ameshkov/diffupdates/tree/b81243c50d23e0a8be0fe95a80d55abd00b08981?tab=readme-ov-file#-diff-path
-    DiffPath: string,
+    diffPath: string,
 };
 
 /**
@@ -51,7 +51,7 @@ export class FilterParser {
             expires: Number(FilterParser.parseTag('Expires', rules)),
             timeUpdated: FilterParser.parseTag('TimeUpdated', rules),
             // Specs - https://github.com/ameshkov/diffupdates/tree/b81243c50d23e0a8be0fe95a80d55abd00b08981?tab=readme-ov-file#-diff-path
-            DiffPath: FilterParser.parseTag('Diff-Path', rules),
+            diffPath: FilterParser.parseTag('Diff-Path', rules),
         };
     }
 

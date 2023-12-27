@@ -91,16 +91,21 @@ export class CommonFilterApi {
     public static async updateFilter(filterUpdateDetail: FilterUpdateDetail): Promise<RegularFilterMetadata | null> {
         Log.info(`Update filter ${filterUpdateDetail.filterId}`);
 
-        const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
+        let filterMetadata = null;
+        // we do not have to check metadata for the filters which do not update with force, because
+        // they even do not trigger metadata update
+        if (filterUpdateDetail.force) {
+            filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
 
-        if (!filterMetadata) {
-            Log.error(`Cannot find filter ${filterUpdateDetail.filterId} metadata`);
-            return null;
-        }
+            if (!filterMetadata) {
+                Log.error(`Cannot find filter ${filterUpdateDetail.filterId} metadata`);
+                return null;
+            }
 
-        if (!CommonFilterApi.isFilterNeedUpdate(filterMetadata)) {
-            Log.info(`Filter ${filterUpdateDetail.filterId} is already updated`);
-            return null;
+            if (!CommonFilterApi.isFilterNeedUpdate(filterMetadata)) {
+                Log.info(`Filter ${filterUpdateDetail.filterId} is already updated`);
+                return null;
+            }
         }
 
         Log.info(`Filter ${filterUpdateDetail.filterId} is need to updated`);
@@ -160,10 +165,12 @@ export class CommonFilterApi {
             version,
             expires,
             timeUpdated,
+            diffPath,
         } = filterMetadata;
 
         filterVersionStorage.set(filterUpdateDetail.filterId, {
             version,
+            diffPath,
             expires: Number(expires),
             lastUpdateTime: new Date(timeUpdated).getTime(),
             lastCheckTime: Date.now(),

@@ -415,10 +415,16 @@ export class CustomFilterApi {
     ): Promise<CustomFilterMetadata> {
         const { filterId } = filterMetadata;
 
-        const { version, expires, timeUpdated } = parsed;
+        const {
+            version,
+            expires,
+            timeUpdated,
+            diffPath,
+        } = parsed;
 
         filterVersionStorage.set(filterId, {
             version,
+            diffPath,
             expires: Number(expires),
             lastUpdateTime: new Date(timeUpdated).getTime(),
             lastCheckTime: Date.now(),

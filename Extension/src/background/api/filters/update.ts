@@ -131,20 +131,42 @@ export class FilterUpdateApi {
         const installedAndEnabledFilters = FiltersApi.getInstalledAndEnabledFiltersIds();
 
         // If it is a force check - updates all installed and enabled filters.
-        let filtersIdsToUpdate:FilterUpdateDetails = installedAndEnabledFilters.map(
+        let filterUpdateDetailsToUpdate:FilterUpdateDetails = installedAndEnabledFilters.map(
             id => ({ filterId: id, force: forceUpdate }),
         );
 
         // If not a force check - updates only outdated filters.
         if (!forceUpdate) {
-            filtersIdsToUpdate = FilterUpdateApi.selectFiltersForUpdating(updatePeriod, filtersIdsToUpdate);
+            // Select filters with different paths and mark them for no force update
+            let filtersWithDiffPath = FilterUpdateApi.selectFiltersWithDiffPath(filterUpdateDetailsToUpdate);
+            filtersWithDiffPath = filtersWithDiffPath.map(filter => ({ ...filter, force: false }));
+
+            // Select filters for a forced update and mark them accordingly
+            let filtersForForceUpdate = FilterUpdateApi.selectFiltersForUpdating(
+                filterUpdateDetailsToUpdate,
+                updatePeriod,
+            );
+            filtersForForceUpdate = filtersForForceUpdate.map(filter => ({ ...filter, force: true }));
+
+            // Combine both arrays
+            const combinedFilters = [...filtersWithDiffPath, ...filtersForForceUpdate];
+
+            const uniqueFiltersMap = new Map();
+
+            combinedFilters.forEach(filter => {
+                if (!uniqueFiltersMap.has(filter.filterId) || filter.force) {
+                    uniqueFiltersMap.set(filter.filterId, filter);
+                }
+            });
+
+            filterUpdateDetailsToUpdate = Array.from(uniqueFiltersMap.values());
         }
 
-        const updatedFilters = await FilterUpdateApi.updateFilters(filtersIdsToUpdate);
+        const updatedFilters = await FilterUpdateApi.updateFilters(filterUpdateDetailsToUpdate);
 
         // Updates last check time of all installed and enabled filters.
         filterVersionStorage.refreshLastCheckTime(
-            filtersIdsToUpdate.map(({ filterId }) => filterId),
+            filterUpdateDetailsToUpdate.map(({ filterId }) => filterId),
         );
 
         // If some filters were updated, then it is time to update the engine.
@@ -169,9 +191,11 @@ export class FilterUpdateApi {
          * version matching on update check.
          * We do not update metadata on each check if there are no filters or only custom filters.
          */
-        if (filterUpdateDetails.some((filterUpdateDetail) => {
-            return CommonFilterApi.isCommonFilter(filterUpdateDetail.filterId);
-        })) {
+        const shouldLoadMetadata = filterUpdateDetails.some(filterUpdateDetail => {
+            return filterUpdateDetail.force && CommonFilterApi.isCommonFilter(filterUpdateDetail.filterId);
+        });
+
+        if (shouldLoadMetadata) {
             await FiltersApi.loadMetadata(true);
         }
 
@@ -230,29 +254,39 @@ export class FilterUpdateApi {
     }
 
     /**
+     * Selects filters with diff path field.
+     *
+     * @param filterUpdateDetails Filter update details.
+     *
+     * @returns List with filter update details, which have diff path.
+     */
+    private static selectFiltersWithDiffPath(filterUpdateDetails: FilterUpdateDetails): FilterUpdateDetails {
+        const filterVersions = filterVersionStorage.getData();
+        return filterUpdateDetails.filter(filterData => {
+            const filterVersion = filterVersions[filterData.filterId];
+            // we do not check here expires, since @adguard/filters-downloader does it.
+            return filterVersion?.diffPath;
+        });
+    }
+
+    /**
      * Selects outdated filters from the provided filter list, based on the
      * provided filter update period from the settings.
-     * Also, if filter has DiffPath, we update it without checking expires value.
      *
-     * @param updatePeriod Period of checking updates in ms.
      * @param filterUpdateDetails List of filter update details.
      *
+     * @param updatePeriod Period of checking updates in ms.
      * @returns List of outdated filter ids.
      */
     private static selectFiltersForUpdating(
-        updatePeriod: number,
         filterUpdateDetails: FilterUpdateDetails,
+        updatePeriod: number,
     ): FilterUpdateDetails {
         const filterVersions = filterVersionStorage.getData();
 
         return filterUpdateDetails.filter((data) => {
-            // if filter contains Diff-Path in the metadata, we try to update it via patches in any way
-            const metadata = FiltersApi.getFilterMetadata(data.filterId);
-            if (metadata?.diffPath) {
-                return true;
-            }
-
             const filterVersion = filterVersions[data.filterId];
+
             if (!filterVersion) {
                 return true;
             }
