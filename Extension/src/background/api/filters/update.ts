@@ -137,19 +137,17 @@ export class FilterUpdateApi {
 
         // If not a force check - updates only outdated filters.
         if (!forceUpdate) {
-            // Select filters with different paths and mark them for no force update
-            let filtersWithDiffPath = FilterUpdateApi.selectFiltersWithDiffPath(filterUpdateDetailsToUpdate);
-            filtersWithDiffPath = filtersWithDiffPath.map(filter => ({ ...filter, force: false }));
+            // Select filters with diff paths and mark them for no force update
+            const filtersWithDiffPath = FilterUpdateApi.selectFiltersWithDiffPath(filterUpdateDetailsToUpdate);
 
             // Select filters for a forced update and mark them accordingly
-            let filtersForForceUpdate = FilterUpdateApi.selectFiltersForUpdating(
+            const expiredFilters = FilterUpdateApi.selectExpiredFilters(
                 filterUpdateDetailsToUpdate,
                 updatePeriod,
             );
-            filtersForForceUpdate = filtersForForceUpdate.map(filter => ({ ...filter, force: true }));
 
             // Combine both arrays
-            const combinedFilters = [...filtersWithDiffPath, ...filtersForForceUpdate];
+            const combinedFilters = [...filtersWithDiffPath, ...expiredFilters];
 
             const uniqueFiltersMap = new Map();
 
@@ -266,7 +264,7 @@ export class FilterUpdateApi {
             const filterVersion = filterVersions[filterData.filterId];
             // we do not check here expires, since @adguard/filters-downloader does it.
             return filterVersion?.diffPath;
-        });
+        }).map(filterData => ({ ...filterData, force: false }));
     }
 
     /**
@@ -278,7 +276,7 @@ export class FilterUpdateApi {
      * @param updatePeriod Period of checking updates in ms.
      * @returns List of outdated filter ids.
      */
-    private static selectFiltersForUpdating(
+    private static selectExpiredFilters(
         filterUpdateDetails: FilterUpdateDetails,
         updatePeriod: number,
     ): FilterUpdateDetails {
@@ -303,6 +301,6 @@ export class FilterUpdateApi {
             // Check, if the renewal period of each filter has passed.
             // If it is time to check the renewal, add to the array.
             return lastCheckTime + updatePeriod <= Date.now();
-        });
+        }).map(filter => ({ ...filter, force: true }));
     }
 }
