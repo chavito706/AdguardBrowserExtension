@@ -91,11 +91,10 @@ export class CommonFilterApi {
     public static async updateFilter(filterUpdateDetail: FilterUpdateDetail): Promise<RegularFilterMetadata | null> {
         Log.info(`Update filter ${filterUpdateDetail.filterId}`);
 
-        let filterMetadata = null;
         // we do not have to check metadata for the filters which do not update with force, because
         // they even do not trigger metadata update
         if (filterUpdateDetail.force) {
-            filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
+            const filterMetadata = CommonFilterApi.getFilterMetadata(filterUpdateDetail.filterId);
 
             if (!filterMetadata) {
                 Log.error(`Cannot find filter ${filterUpdateDetail.filterId} metadata`);
@@ -111,7 +110,7 @@ export class CommonFilterApi {
         Log.info(`Filter ${filterUpdateDetail.filterId} is need to updated`);
 
         try {
-            await CommonFilterApi.loadFilterRulesFromBackend(filterUpdateDetail, true);
+            const filterMetadata = await CommonFilterApi.loadFilterRulesFromBackend(filterUpdateDetail, true);
             Log.info(`Filter ${filterUpdateDetail.filterId} updated successfully`);
             return filterMetadata;
         } catch (e) {
@@ -130,7 +129,7 @@ export class CommonFilterApi {
     public static async loadFilterRulesFromBackend(
         filterUpdateDetail: FilterUpdateDetail,
         forceRemote: boolean,
-    ): Promise<void> {
+    ): Promise<RegularFilterMetadata> {
         const isOptimized = settingsStorage.get(SettingOption.UseOptimizedFilters);
         const oldRawFilter = await RawFiltersStorage.get(filterUpdateDetail.filterId);
 
@@ -175,6 +174,8 @@ export class CommonFilterApi {
             lastUpdateTime: new Date(timeUpdated).getTime(),
             lastCheckTime: Date.now(),
         });
+
+        return filterMetadata;
     }
 
     /**
@@ -237,8 +238,8 @@ export class CommonFilterApi {
     }
 
     /**
-     * Checks if common filter need update.
-     * Matches version from updated metadata with data in filter version storage.
+     * Checks if common filter needs update.
+     * Matches the version from updated metadata with data in filter version storage.
      *
      * @param filterMetadata Updated filter metadata.
      *

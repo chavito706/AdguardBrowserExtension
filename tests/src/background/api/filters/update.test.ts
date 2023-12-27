@@ -25,6 +25,7 @@ import { mockLocalStorage } from '../../../../helpers';
 import { AntibannerGroupsId, APP_VERSION_KEY } from '../../../../../Extension/src/common/constants';
 import { SettingOption } from '../../../../../Extension/src/background/schema';
 import { fakeFilterWithVersion } from '../../../../helpers/fixtures/fake-filter-with-version';
+import { fakeFilterV4WithDiffPath } from '../../../../helpers/fixtures/fake_filter_v4_with_diff_path';
 
 jest.mock('../../../../../Extension/src/background/engine');
 
@@ -291,20 +292,39 @@ describe('Filter Update API should', () => {
             expect(await RawFiltersStorage.get(1)).toEqual(fakeFilterV1.split('\n'));
 
             returnMetadataWithVersion(filterId, '4.0.0.0');
-
             const filterVersionData = filterVersionStorage.getData();
             filterVersionData[1]!.lastCheckTime = 0;
+
+            // return filter with diff path
+            jest.spyOn(FiltersDownloader, 'downloadWithRaw')
+                .mockImplementation(() => Promise.resolve({
+                    filter: fakeFilterV4WithDiffPath.split('\n'),
+                    rawFilter: fakeFilterV4WithDiffPath.split('\n'),
+                }));
+
             await FilterUpdateApi.autoUpdateFilters(false);
             expect(FiltersDownloader.downloadWithRaw).nthCalledWith(
                 3,
                 'https://filters.adtidy.org/extension/chromium/filters/1.txt',
                 {
+                    force: true,
                     definedExpressions,
-                    rawFilter: fakeFilterV1,
                 },
             );
-            expect(await FiltersStorage.get(1)).toEqual(fakeFilterV1.split('\n'));
-            expect(await RawFiltersStorage.get(1)).toEqual(fakeFilterV1.split('\n'));
+            expect(await FiltersStorage.get(1)).toEqual(fakeFilterV4WithDiffPath.split('\n'));
+            expect(await RawFiltersStorage.get(1)).toEqual(fakeFilterV4WithDiffPath.split('\n'));
+
+            await FilterUpdateApi.autoUpdateFilters(false);
+            expect(FiltersDownloader.downloadWithRaw).nthCalledWith(
+                4,
+                'https://filters.adtidy.org/extension/chromium/filters/1.txt',
+                {
+                    definedExpressions,
+                    rawFilter: fakeFilterV4WithDiffPath,
+                },
+            );
+            expect(await FiltersStorage.get(1)).toEqual(fakeFilterV4WithDiffPath.split('\n'));
+            expect(await RawFiltersStorage.get(1)).toEqual(fakeFilterV4WithDiffPath.split('\n'));
         });
     });
 });

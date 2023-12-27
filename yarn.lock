@@ -22,8 +22,10 @@
   resolved "https://registry.yarnpkg.com/@adguard/extended-css/-/extended-css-2.0.56.tgz#4205287fc3e0b4dbf9f64ccad55c56a73e04cef1"
   integrity sha512-RMPRGZ80kM6KiKRR0K2DUOD0+2CiadBk+G6zYBrRmzk4lD71Cipv2b9/rRy9Fdh41ipoApZsQdbJZozXFsM8RA==
 
-"@adguard/filters-downloader@file:../filters-downloader":
+"@adguard/filters-downloader@^2.0.0":
   version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@adguard/filters-downloader/-/filters-downloader-2.0.0.tgz#0a22be273d4e4eb7fa0d7ff22802580bf9fe852b"
+  integrity sha512-5jC8DwoHOZ61CKsd68GkGISv42+gcwujdtcDCzJfLM2ZZeGfD/2cPVkbq3zdXK/icK0w95g4W1SoJ/U2MRjJlA==
   dependencies:
     "@adguard/diff-builder" "1.0.1"
     axios "1.6.2"

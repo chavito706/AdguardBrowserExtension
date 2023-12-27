@@ -80,6 +80,7 @@ export class FilterParser {
 
             if (indexOfSearch >= 0) {
                 result = rule.substring(indexOfSearch + search.length);
+                break;
             }
         }
 
