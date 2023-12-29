@@ -66,8 +66,6 @@ export enum SettingOption {
     I18nMetadata = 'filters-i18n-metadata',
     CustomFilters = 'custom-filters',
 
-    ConsentedFilters = 'consented-filters',
-
     // Allowlist domains.
     DisableFiltering = 'adguard-disabled',
 }
@@ -224,11 +222,6 @@ export const settingsValidator = zod.object({
      */
     [SettingOption.CustomFilters]: zod.string().optional(),
     // ----- Metadata section -----
-
-    /**
-     * See {@link AnnoyancesConsentStorageData}.
-     */
-    [SettingOption.ConsentedFilters]: zod.array(zod.number()),
 
     /**
      * Is filtering enabled or not. Is needed for fast toggling filtering
