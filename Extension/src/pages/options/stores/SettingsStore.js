@@ -42,6 +42,7 @@ import {
 } from '../components/Filters/helpers';
 import { optionsStorage } from '../options-storage';
 import {
+    AntiBannerFiltersId,
     AntibannerGroupsId,
     RECOMMENDED_TAG_ID,
     TRUSTED_TAG,
@@ -295,6 +296,13 @@ class SettingsStore {
         return category.enabled;
     }
 
+    /**
+     * Checks whether the group is touched.
+     *
+     * @param {number} groupId Group id.
+     *
+     * @returns {boolean} True if the group is touched, false otherwise.
+     */
     isGroupTouched(groupId) {
         return this.categories.some((c) => c.groupId === groupId && c.touched);
     }
@@ -314,6 +322,9 @@ class SettingsStore {
         this.isFilterEnabled(UrlTrackingFilterId);
     }
 
+    /**
+     * List of annoyances filters.
+     */
     @computed
     get annoyancesFilters() {
         const annoyancesGroup = this.categories.find((group) => {
@@ -322,6 +333,9 @@ class SettingsStore {
         return annoyancesGroup.filters;
     }
 
+    /**
+     * List of recommended annoyances filters.
+     */
     @computed
     get recommendedAnnoyancesFilters() {
         const recommendedFilters = [];
@@ -331,6 +345,18 @@ class SettingsStore {
             }
         });
         return recommendedFilters;
+    }
+
+    // FIXME: use for AnnoyancesConsent's Filter policy url
+    /**
+     * List of AdGuard annoyances filters.
+     */
+    @computed
+    get agAnnoyancesFilters() {
+        return [
+            ...this.recommendedAnnoyancesFilters,
+            AntiBannerFiltersId.AnnoyancesCombinedFilterId,
+        ];
     }
 
     @computed
