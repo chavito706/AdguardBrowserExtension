@@ -24,13 +24,14 @@ import { annoyancesConsentStorage } from '../../storages';
  * Class for managing annoyances filters consent.
  */
 export class AnnoyancesConsentApi {
-    private readonly consentedFilterIds: Set<number>;
+    private consentedFilterIds: Set<number> | null;
 
     /**
      * Creates an instance of {@link AnnoyancesConsentApi}.
      */
     constructor() {
-        this.consentedFilterIds = new Set<number>();
+        // init value
+        this.consentedFilterIds = null;
     }
 
     /**
@@ -59,6 +60,14 @@ export class AnnoyancesConsentApi {
     }
 
     /**
+     * Restores consented annoyances filter ids from storage.
+     */
+    private async restoreConsentedFilterIds(): Promise<void> {
+        const storedConsentedFilterIds = await AnnoyancesConsentApi.getFromStorage();
+        this.consentedFilterIds = new Set(storedConsentedFilterIds);
+    }
+
+    /**
      * Resets consented annoyances filter ids to empty array.
      */
     public static async reset(): Promise<void> {
@@ -71,18 +80,13 @@ export class AnnoyancesConsentApi {
      * @param filterIds Filter ids.
      */
     public async addFilterIds(filterIds: number[]): Promise<void> {
-        if (this.consentedFilterIds.size === 0) {
-            const consentedFilterIds = await AnnoyancesConsentApi.getFromStorage();
-            consentedFilterIds.forEach((id) => {
-                this.consentedFilterIds.add(id);
-            });
+        if (this.consentedFilterIds === null) {
+            await this.restoreConsentedFilterIds();
+        } else {
+            filterIds.forEach((id) => this.consentedFilterIds?.add(id));
         }
 
-        filterIds.forEach((filterId) => {
-            this.consentedFilterIds.add(filterId);
-        });
-
-        annoyancesConsentStorage.setData(Array.from(this.consentedFilterIds));
+        annoyancesConsentStorage.setData(Array.from(this.consentedFilterIds || []));
     }
 
     /**
@@ -93,7 +97,10 @@ export class AnnoyancesConsentApi {
      * @returns True if consent is granted for filter, otherwise false.
      */
     public async isConsentedFilter(id: number): Promise<boolean> {
-        return this.consentedFilterIds.has(id);
+        if (this.consentedFilterIds === null) {
+            await this.restoreConsentedFilterIds();
+        }
+        return this.consentedFilterIds?.has(id) || false;
     }
 }
 
