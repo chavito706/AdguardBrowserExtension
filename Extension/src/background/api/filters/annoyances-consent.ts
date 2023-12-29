@@ -62,7 +62,7 @@ export class AnnoyancesConsentApi {
      * Resets consented annoyances filter ids to empty array.
      */
     public static async reset(): Promise<void> {
-        annoyancesConsentStorage.setData([]);
+        await annoyancesConsentStorage.setData([]);
     }
 
     /**
