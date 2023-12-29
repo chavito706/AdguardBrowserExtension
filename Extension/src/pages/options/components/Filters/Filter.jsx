@@ -113,22 +113,30 @@ const Filter = observer(({ filter }) => {
     const handleFilterSwitch = async ({ id, data }) => {
         // remove prefix from filter id and parse it to number
         const filterId = Number.parseInt(removePrefix(id), 10);
-
         const annoyancesFilter = settingsStore.annoyancesFilters.find((f) => f.filterId === filterId);
-        const isConsentedFilter = await messenger.getIsConsentedFilter(filterId);
 
-        if (
-            annoyancesFilter
-            && !isConsentedFilter
-            // on filter enable
-            && data
-        ) {
-            settingsStore.setFiltersToGetConsentFor([annoyancesFilter]);
-            setIsOpenAnnoyancesFilterConsentModal(true);
+        // if filter is not annoyances filter, just update its setting
+        if (!annoyancesFilter) {
+            await settingsStore.updateFilterSetting(filterId, data);
             return;
         }
 
-        await settingsStore.updateFilterSetting(filterId, data);
+        if (!data) {
+            // just update filter setting on annoyances filter disabling
+            await settingsStore.updateFilterSetting(filterId, data);
+            return;
+        }
+
+        const isConsentedFilter = await messenger.getIsConsentedFilter(filterId);
+        if (isConsentedFilter) {
+            // for already consented filters just update its setting
+            await settingsStore.updateFilterSetting(filterId, data);
+            return;
+        }
+
+        // ask user to consent for annoyances filter
+        settingsStore.setFiltersToGetConsentFor([annoyancesFilter]);
+        setIsOpenAnnoyancesFilterConsentModal(true);
     };
 
     const handleRemoveFilterClick = async (e) => {
