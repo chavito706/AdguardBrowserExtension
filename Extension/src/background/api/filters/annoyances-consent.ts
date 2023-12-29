@@ -48,13 +48,13 @@ export class AnnoyancesConsentApi {
                 annoyancesConsentStorage.setCache(data);
             } else {
                 data = [];
-                annoyancesConsentStorage.setData(data);
+                await annoyancesConsentStorage.setData(data);
             }
         } catch (e) {
             // eslint-disable-next-line max-len
             Log.warn(`Cannot parse data from "${annoyancesConsentStorage.key}" storage, set default states. Origin error: `, e);
             data = [];
-            annoyancesConsentStorage.setData(data);
+            await annoyancesConsentStorage.setData(data);
         }
         return data;
     }
@@ -86,7 +86,7 @@ export class AnnoyancesConsentApi {
 
         filterIds.forEach((id) => this.consentedFilterIds?.add(id));
 
-        annoyancesConsentStorage.setData(Array.from(this.consentedFilterIds || []));
+        await annoyancesConsentStorage.setData(Array.from(this.consentedFilterIds || []));
     }
 
     /**
