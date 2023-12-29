@@ -82,9 +82,9 @@ export class AnnoyancesConsentApi {
     public async addFilterIds(filterIds: number[]): Promise<void> {
         if (this.consentedFilterIds === null) {
             await this.restoreConsentedFilterIds();
-        } else {
-            filterIds.forEach((id) => this.consentedFilterIds?.add(id));
         }
+
+        filterIds.forEach((id) => this.consentedFilterIds?.add(id));
 
         annoyancesConsentStorage.setData(Array.from(this.consentedFilterIds || []));
     }
