@@ -200,7 +200,7 @@ export class CustomFilterApi {
         const filterMetadata: CustomFilterMetadata = {
             filterId,
             displayNumber: 0,
-            groupId: AntibannerGroupsId.CustomFilterGroupId,
+            groupId: AntibannerGroupsId.CustomFiltersGroupId,
             name,
             description,
             homepage,

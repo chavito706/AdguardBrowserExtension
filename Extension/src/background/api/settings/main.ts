@@ -47,6 +47,7 @@ import {
     storage,
 } from '../../storages';
 import {
+    AnnoyancesConsentApi,
     CommonFilterApi,
     CustomFilterApi,
     FiltersApi,
@@ -184,6 +185,9 @@ export class SettingsApi {
 
         // On import should enable only groups from imported file.
         await CommonFilterApi.initDefaultFilters(enableUntouchedGroups);
+
+        // reset list of consented filter ids on reset settings
+        await AnnoyancesConsentApi.reset();
     }
 
     /**

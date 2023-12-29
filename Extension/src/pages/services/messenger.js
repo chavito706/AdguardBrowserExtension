@@ -223,11 +223,10 @@ class Messenger {
         return this.sendMessage(MessageType.CheckFiltersUpdate);
     }
 
-    async updateGroupStatus(id, data) {
+    async updateGroupStatus(groupId, data) {
         const type = data
             ? MessageType.EnableFiltersGroup
             : MessageType.DisableFiltersGroup;
-        const groupId = id - 0;
         return this.sendMessage(type, { groupId });
     }
 
@@ -236,6 +235,14 @@ class Messenger {
             ? MessageType.AddAndEnableFilter
             : MessageType.DisableFilter;
         return this.sendMessage(type, { filterId });
+    }
+
+    async setConsentedFilters(filterIds) {
+        return this.sendMessage(MessageType.SetConsentedFilters, { filterIds });
+    }
+
+    async getIsConsentedFilter(filterId) {
+        return this.sendMessage(MessageType.GetIsConsentedFilter, { filterId });
     }
 
     async checkCustomUrl(url) {

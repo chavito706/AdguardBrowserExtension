@@ -43,6 +43,7 @@ import {
 import { optionsStorage } from '../options-storage';
 import {
     AntibannerGroupsId,
+    RECOMMENDED_TAG_ID,
     TRUSTED_TAG,
     WASTE_CHARACTERS,
 } from '../../../common/constants';
@@ -117,6 +118,8 @@ class SettingsStore {
     @observable fullscreenUserRulesEditorIsOpen = false;
 
     @observable allowlistSizeReset = false;
+
+    @observable filtersToGetConsentFor = [];
 
     constructor(rootStore) {
         makeObservable(this);
@@ -292,6 +295,10 @@ class SettingsStore {
         return category.enabled;
     }
 
+    isGroupTouched(groupId) {
+        return this.categories.some((c) => c.groupId === groupId && c.touched);
+    }
+
     isAllowAcceptableAdsFilterEnabled() {
         const { SearchAndSelfPromoFilterId } = this.constants.AntiBannerFiltersId;
         this.isFilterEnabled(SearchAndSelfPromoFilterId);
@@ -308,21 +315,39 @@ class SettingsStore {
     }
 
     @computed
+    get annoyancesFilters() {
+        const annoyancesGroup = this.categories.find((group) => {
+            return group.groupId === AntibannerGroupsId.AnnoyancesFiltersGroupId;
+        });
+        return annoyancesGroup.filters;
+    }
+
+    @computed
+    get recommendedAnnoyancesFilters() {
+        const recommendedFilters = [];
+        this.annoyancesFilters.forEach((filter) => {
+            if (filter.tags.includes(RECOMMENDED_TAG_ID)) {
+                recommendedFilters.push(filter);
+            }
+        });
+        return recommendedFilters;
+    }
+
+    @computed
     get lastUpdateTime() {
         // TODO: lastCheckTime or lastUpdateTime?
         return Math.max(...this.filters.map((filter) => filter.lastCheckTime || 0));
     }
 
     @action
-    async updateGroupSetting(id, enabled) {
-        const recommendedFiltersIds = await messenger.updateGroupStatus(id, enabled);
+    async updateGroupSetting(groupId, enabled) {
+        const recommendedFiltersIds = await messenger.updateGroupStatus(groupId, enabled);
 
         runInAction(() => {
-            const groupId = parseInt(id, 10);
             if (groupId === AntibannerGroupsId.OtherFiltersGroupId
                 && this.isAllowAcceptableAdsFilterEnabled()) {
                 this.allowAcceptableAds = enabled;
-            } else if (groupId === AntibannerGroupsId.PrivacyFilterGroupId) {
+            } else if (groupId === AntibannerGroupsId.PrivacyFiltersGroupId) {
                 if (this.isBlockKnownTrackersFilterEnabled()) {
                     this.blockKnownTrackers = enabled;
                 }
@@ -348,6 +373,11 @@ class SettingsStore {
                 });
             }
         });
+    }
+
+    @action
+    setFiltersToGetConsentFor(filters) {
+        this.filtersToGetConsentFor = filters;
     }
 
     @action
@@ -389,8 +419,7 @@ class SettingsStore {
     };
 
     @action
-    async updateFilterSetting(rawFilterId, enabled) {
-        const filterId = Number.parseInt(rawFilterId, 10);
+    async updateFilterSetting(filterId, enabled) {
         this.setFilterEnabledState(filterId, enabled);
         try {
             const groupId = await messenger.updateFilterStatus(filterId, enabled);

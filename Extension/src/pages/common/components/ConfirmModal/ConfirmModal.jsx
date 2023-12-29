@@ -19,6 +19,8 @@
 import React from 'react';
 import Modal from 'react-modal';
 
+import { reactTranslator } from '../../../../common/translators/reactTranslator';
+
 export const ConfirmModal = ({
     title,
     subtitle,
@@ -29,7 +31,7 @@ export const ConfirmModal = ({
     customConfirmTitle,
 }) => {
     const confirmTitle = customConfirmTitle || 'OK';
-    const cancelTitle = customCancelTitle || 'Cancel';
+    const cancelTitle = customCancelTitle || reactTranslator.getMessage('options_confirm_modal_cancel_button');
 
     const closeModal = () => {
         setIsOpen(false);

@@ -63,6 +63,7 @@ export const defaultSettings: Settings = {
     [SettingOption.DisableFiltering]: false,
     [SettingOption.DisableShowPageStats]: false,
     [SettingOption.DisableShowContextMenu]: false,
+    [SettingOption.ConsentedFilters]: [],
     [SettingOption.AllowlistDomains]: JSON.stringify(DEFAULT_ALLOWLIST),
     [SettingOption.InvertedAllowlistDomains]: JSON.stringify(DEFAULT_INVERTED_ALLOWLIST),
 };

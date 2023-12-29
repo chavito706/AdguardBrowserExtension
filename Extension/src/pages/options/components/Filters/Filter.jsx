@@ -30,11 +30,13 @@ import cn from 'classnames';
 import { Setting, SETTINGS_TYPES } from '../Settings/Setting';
 import { rootStore } from '../../stores/RootStore';
 import { reactTranslator } from '../../../../common/translators/reactTranslator';
+import { messenger } from '../../../services/messenger';
 import { Icon } from '../../../common/components/ui/Icon';
 import { ConfirmModal } from '../../../common/components/ConfirmModal';
 import { TRUSTED_TAG } from '../../../../common/constants';
 import { Popover } from '../../../common/components/ui/Popover';
 
+import { AnnoyancesConsent } from './AnnoyancesConsent';
 import { HighlightSearch } from './Search/HighlightSearch';
 import { FilterTags } from './FilterTags';
 
@@ -78,6 +80,8 @@ const Filter = observer(({ filter }) => {
 
     const [isOpenRemoveFilterModal, setIsOpenRemoveFilterModal] = useState(false);
 
+    const [isOpenAnnoyancesFilterConsentModal, setIsOpenAnnoyancesFilterConsentModal] = useState(false);
+
     const {
         name,
         filterId,
@@ -101,10 +105,30 @@ const Filter = observer(({ filter }) => {
         }]
         : [...tagsDetails];
 
+    const handleAnnoyancesFilterConsentConfirm = async () => {
+        await settingsStore.updateFilterSetting(filterId, true);
+        await messenger.setConsentedFilters([filterId]);
+    };
+
     const handleFilterSwitch = async ({ id, data }) => {
-        // remove prefix from filter id
-        const filterIdWithoutPrefix = removePrefix(id);
-        await settingsStore.updateFilterSetting(filterIdWithoutPrefix, data);
+        // remove prefix from filter id and parse it to number
+        const filterId = Number.parseInt(removePrefix(id), 10);
+
+        const annoyancesFilter = settingsStore.annoyancesFilters.find((f) => f.filterId === filterId);
+        const isConsentedFilter = await messenger.getIsConsentedFilter(filterId);
+
+        if (
+            annoyancesFilter
+            && !isConsentedFilter
+            // on filter enable
+            && data
+        ) {
+            settingsStore.setFiltersToGetConsentFor([annoyancesFilter]);
+            setIsOpenAnnoyancesFilterConsentModal(true);
+            return;
+        }
+
+        await settingsStore.updateFilterSetting(filterId, data);
     };
 
     const handleRemoveFilterClick = async (e) => {
@@ -128,7 +152,6 @@ const Filter = observer(({ filter }) => {
                             setIsOpen={setIsOpenRemoveFilterModal}
                             onConfirm={handleRemoveFilterConfirm}
                             customConfirmTitle={reactTranslator.getMessage('options_remove_filter_confirm_modal_ok_button')}
-                            customCancelTitle={reactTranslator.getMessage('options_confirm_modal_cancel_button')}
                         />
                     )}
                     <a
@@ -206,6 +229,13 @@ const Filter = observer(({ filter }) => {
                                 value={!!enabled}
                                 handler={handleFilterSwitch}
                             />
+                            {isOpenAnnoyancesFilterConsentModal && (
+                                <AnnoyancesConsent
+                                    isOpen={isOpenAnnoyancesFilterConsentModal}
+                                    setIsOpen={setIsOpenAnnoyancesFilterConsentModal}
+                                    onConfirm={handleAnnoyancesFilterConsentConfirm}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

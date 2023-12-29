@@ -32,10 +32,12 @@ import { sortBy } from 'lodash-es';
 import { rootStore } from '../../stores/RootStore';
 import { reactTranslator } from '../../../../common/translators/reactTranslator';
 import { SettingsSection } from '../Settings/SettingsSection';
+import { messenger } from '../../../services/messenger';
 import { Icon } from '../../../common/components/ui/Icon';
 import { Setting, SETTINGS_TYPES } from '../Settings/Setting';
 import { AntibannerGroupsId } from '../../../../common/constants';
 
+import { AnnoyancesConsent } from './AnnoyancesConsent';
 import { Group } from './Group';
 import { SearchGroup } from './Search/SearchGroup';
 import { Filter } from './Filter';
@@ -63,18 +65,20 @@ const Filters = observer(() => {
     const [urlToSubscribe, setUrlToSubscribe] = useState(decodeURIComponent(query.get(QUERY_PARAM_NAMES.SUBSCRIBE) || ''));
     const [customFilterTitle, setCustomFilterTitle] = useState(query.get(QUERY_PARAM_NAMES.TITLE));
 
+    const [isOpenAnnoyancesGroupConsentModal, setIsOpenAnnoyancesGroupConsentModal] = useState(false);
+
     // This state used to remove blinking while filters to render were not selected
     const [groupDetermined, setGroupDetermined] = useState(false);
 
     const GROUP_DESCRIPTION = {
-        0: reactTranslator.getMessage('group_description_custom'),
-        1: reactTranslator.getMessage('group_description_adblocking'),
-        2: reactTranslator.getMessage('group_description_stealth'),
-        3: reactTranslator.getMessage('group_description_social'),
-        4: reactTranslator.getMessage('group_description_annoyances'),
-        5: reactTranslator.getMessage('group_description_security'),
-        6: reactTranslator.getMessage('group_description_miscellaneous'),
-        7: reactTranslator.getMessage('group_description_lang'),
+        [AntibannerGroupsId.CustomFiltersGroupId]: reactTranslator.getMessage('group_description_custom'),
+        [AntibannerGroupsId.AdBlockingFiltersGroupId]: reactTranslator.getMessage('group_description_adblocking'),
+        [AntibannerGroupsId.PrivacyFiltersGroupId]: reactTranslator.getMessage('group_description_stealth'),
+        [AntibannerGroupsId.SocialFiltersGroupId]: reactTranslator.getMessage('group_description_social'),
+        [AntibannerGroupsId.AnnoyancesFiltersGroupId]: reactTranslator.getMessage('group_description_annoyances'),
+        [AntibannerGroupsId.SecurityFiltersGroupId]: reactTranslator.getMessage('group_description_security'),
+        [AntibannerGroupsId.OtherFiltersGroupId]: reactTranslator.getMessage('group_description_miscellaneous'),
+        [AntibannerGroupsId.LanguageFiltersGroupId]: reactTranslator.getMessage('group_description_lang'),
     };
 
     const {
@@ -90,8 +94,29 @@ const Filters = observer(() => {
         settingsStore.setSearchSelect(SEARCH_FILTERS.ALL);
     }, [location.search, query, settingsStore]);
 
+    const handleAnnoyancesFiltersGroupConsentConfirm = async () => {
+        await settingsStore.updateGroupSetting(AntibannerGroupsId.AnnoyancesFiltersGroupId, true);
+        await messenger.setConsentedFilters(
+            settingsStore.recommendedAnnoyancesFilters.map((f) => f.filterId),
+        );
+    };
+
     const handleGroupSwitch = async ({ id, data }) => {
-        await settingsStore.updateGroupSetting(id, data);
+        const groupId = Number.parseInt(id, 10);
+
+        // get user consent about recommended filters for the first time user enables annoyances filter group. AG-29161
+        if (
+            groupId === AntibannerGroupsId.AnnoyancesFiltersGroupId
+            && !settingsStore.isGroupTouched(groupId)
+            // on group enable
+            && data
+        ) {
+            settingsStore.setFiltersToGetConsentFor(settingsStore.recommendedAnnoyancesFilters);
+            setIsOpenAnnoyancesGroupConsentModal(true);
+            return;
+        }
+
+        await settingsStore.updateGroupSetting(groupId, data);
     };
 
     const groupClickHandler = (groupId) => () => {
@@ -107,6 +132,8 @@ const Filters = observer(() => {
     );
 
     const renderGroups = (groups) => {
+        // TODO: use 'displayNumber' as a const
+        // or add sorting by it to a separate helper as it is used in several places
         const sortedGroups = sortBy(groups, 'displayNumber');
         return sortedGroups.map((group) => {
             const enabledFilters = getEnabledFiltersByGroup(group);
@@ -226,7 +253,7 @@ const Filters = observer(() => {
         });
 
         // eslint-disable-next-line max-len
-        const isCustom = settingsStore.selectedGroupId === AntibannerGroupsId.CustomFilterGroupId;
+        const isCustom = settingsStore.selectedGroupId === AntibannerGroupsId.CustomFiltersGroupId;
         const isEmpty = filtersToRender.length === 0;
 
         const groupChangeHandler = async ({ id, data }) => {
@@ -303,6 +330,13 @@ const Filters = observer(() => {
             {settingsStore.isSearching
                 ? renderGroupsOnSearch(filtersToRender)
                 : renderGroups(categories)}
+            {isOpenAnnoyancesGroupConsentModal && (
+                <AnnoyancesConsent
+                    isOpen={isOpenAnnoyancesGroupConsentModal}
+                    setIsOpen={setIsOpenAnnoyancesGroupConsentModal}
+                    onConfirm={handleAnnoyancesFiltersGroupConsentConfirm}
+                />
+            )}
         </SettingsSection>
     );
 });
