@@ -355,7 +355,9 @@ class SettingsStore {
     get agAnnoyancesFilters() {
         return [
             ...this.recommendedAnnoyancesFilters,
-            AntiBannerFiltersId.AnnoyancesCombinedFilterId,
+            this.annoyancesFilters.find((f) => {
+                return f.filterId === AntiBannerFiltersId.AnnoyancesCombinedFilterId;
+            }),
         ];
     }
 

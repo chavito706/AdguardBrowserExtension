@@ -20,8 +20,12 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
 
 import { ConfirmModal } from '../../../../common/components/ConfirmModal';
+import { Icon } from '../../../../common/components/ui/Icon';
 import { reactTranslator } from '../../../../../common/translators/reactTranslator';
 import { rootStore } from '../../../stores/RootStore';
+import { FILTER_POLICY_URL } from '../../../constants';
+
+import './annoyances-consent.pcss';
 
 export const AnnoyancesConsent = observer(({
     isOpen,
@@ -30,20 +34,73 @@ export const AnnoyancesConsent = observer(({
 }) => {
     const { settingsStore } = useContext(rootStore);
 
-    // FIXME: render filters due to the design
-    const renderFiltersToAskConsentFor = () => {
-        const { filtersToGetConsentFor } = settingsStore;
-        return `${filtersToGetConsentFor.map((filter) => filter.name).join(', ')}`;
+    const { filtersToGetConsentFor, agAnnoyancesFilters } = settingsStore;
+
+    const renderFilters = () => {
+        return filtersToGetConsentFor.map((filter) => (
+            <div className="annoyances-consent__text annoyances-consent__filter" key={filter.name}>
+                <div className="annoyances-consent__filter--header">
+                    <div className="annoyances-consent__filter--name">
+                        {filter.name}
+                    </div>
+                    <a
+                        href={filter.homepage}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="annoyances-consent__filter--homepage-link"
+                        title={reactTranslator.getMessage('options_filters_filter_link')}
+                    >
+                        <Icon id="#link" />
+                    </a>
+                </div>
+                <div className="annoyances-consent__filter--description">
+                    {filter.description}
+                </div>
+            </div>
+        ));
     };
+
+    const shouldShowFilterPolicy = () => agAnnoyancesFilters.some((f) => filtersToGetConsentFor.includes(f));
+
+    const renderSubtitle = () => (
+        <div className="annoyances-consent__content">
+            <div className="annoyances-consent__text">
+                {reactTranslator.getMessage('options_filters_annoyances_consent_description')}
+            </div>
+            <div className="annoyances-consent__text">
+                {reactTranslator.getMessage('options_filters_annoyances_consent_question')}
+            </div>
+            <div className="annoyances-consent__text">
+                {renderFilters()}
+            </div>
+            {shouldShowFilterPolicy() && (
+                <div className="annoyances-consent__filter--policy">
+                    {reactTranslator.getMessage('options_filters_annoyances_consent_filter_policy', {
+                        a: (chunks) => (
+                            <a
+                                className="annoyances-consent__filter--policy--link"
+                                href={FILTER_POLICY_URL}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chunks}
+                            </a>
+                        ),
+                    })}
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <ConfirmModal
             title={reactTranslator.getMessage('options_filters_annoyances_consent_title')}
-            subtitle={renderFiltersToAskConsentFor()}
+            subtitle={renderSubtitle()}
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             onConfirm={onConfirm}
             customConfirmTitle={reactTranslator.getMessage('options_filters_annoyances_consent_enable_button')}
+            isConsent
         />
     );
 });

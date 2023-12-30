@@ -19,7 +19,10 @@
 import React from 'react';
 import Modal from 'react-modal';
 
+import cn from 'classnames';
+
 import { reactTranslator } from '../../../../common/translators/reactTranslator';
+import { Icon } from '../ui/Icon';
 
 export const ConfirmModal = ({
     title,
@@ -29,9 +32,18 @@ export const ConfirmModal = ({
     setIsOpen,
     customCancelTitle,
     customConfirmTitle,
+    isConsent,
 }) => {
     const confirmTitle = customConfirmTitle || 'OK';
     const cancelTitle = customCancelTitle || reactTranslator.getMessage('options_confirm_modal_cancel_button');
+
+    const subtitleClassName = cn('modal__subtitle', {
+        'modal__subtitle--short': !isConsent,
+    });
+
+    const okBtnClassName = cn('button button--m modal__btn button--green', {
+        'button--red-bg': !isConsent,
+    });
 
     const closeModal = () => {
         setIsOpen(false);
@@ -47,30 +59,44 @@ export const ConfirmModal = ({
             <Modal
                 isOpen={isOpen}
                 onRequestClose={closeModal}
+                // reset default padding
+                style={{ content: { padding: 0 } }}
             >
-                <div className="modal__title">
-                    {title}
-                </div>
-                {subtitle && (
-                    <div className="modal__subtitle modal__subtitle--confirm">
-                        {subtitle}
+                <div className="modal">
+                    <div className="modal__header">
+                        <button
+                            type="button"
+                            className="button modal__close"
+                            aria-label={reactTranslator.getMessage('close_button_title')}
+                            onClick={closeModal}
+                        >
+                            <Icon id="#cross" />
+                        </button>
                     </div>
-                )}
-                <div className="modal__content modal__content--button">
-                    <button
-                        className="button button--m button--red-bg modal__btn modal__btn--statistic"
-                        type="button"
-                        onClick={handleConfirm}
-                    >
-                        {confirmTitle}
-                    </button>
-                    <button
-                        className="button button--m button--transparent modal__btn modal__btn--statistic"
-                        type="button"
-                        onClick={closeModal}
-                    >
-                        {cancelTitle}
-                    </button>
+                    <div className="modal__title">
+                        {title}
+                    </div>
+                    {subtitle && (
+                        <div className={subtitleClassName}>
+                            {subtitle}
+                        </div>
+                    )}
+                    <div className="modal__actions">
+                        <button
+                            className={okBtnClassName}
+                            type="button"
+                            onClick={handleConfirm}
+                        >
+                            {confirmTitle}
+                        </button>
+                        <button
+                            className="button button--m button--transparent modal__btn modal__btn--confirm"
+                            type="button"
+                            onClick={closeModal}
+                        >
+                            {cancelTitle}
+                        </button>
+                    </div>
                 </div>
             </Modal>
         </>
