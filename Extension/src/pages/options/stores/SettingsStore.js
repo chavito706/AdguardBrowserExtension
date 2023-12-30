@@ -347,7 +347,6 @@ class SettingsStore {
         return recommendedFilters;
     }
 
-    // FIXME: use for AnnoyancesConsent's Filter policy url
     /**
      * List of AdGuard annoyances filters.
      */

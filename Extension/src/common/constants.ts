@@ -47,7 +47,6 @@ export enum AntiBannerFiltersId {
     TrackingFilterId = 3,
     SocialFilterId = 4,
     SearchAndSelfPromoFilterId = 10,
-    // FIXME: add description. needed for annoyances consent
     AnnoyancesCombinedFilterId = 14,
     UrlTrackingFilterId = 17,
     AllowlistFilterId = 100,
