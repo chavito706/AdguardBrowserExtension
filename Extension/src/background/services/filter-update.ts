@@ -65,4 +65,7 @@ export class FilterUpdateService {
     }
 }
 
+// @ts-ignore
+window.update = FilterUpdateApi.autoUpdateFilters;
+
 export const filterUpdateService = new FilterUpdateService();

@@ -209,6 +209,7 @@ export class CustomFilterApi {
             expires,
             timeUpdated,
             version,
+            diffPath,
         } = parsed;
 
         const filterMetadata: CustomFilterMetadata = {
@@ -231,6 +232,7 @@ export class CustomFilterApi {
 
         filterVersionStorage.set(filterId, {
             version,
+            diffPath,
             expires: filterMetadata.expires,
             lastUpdateTime: filterMetadata.timeUpdated,
             lastCheckTime: Date.now(),
